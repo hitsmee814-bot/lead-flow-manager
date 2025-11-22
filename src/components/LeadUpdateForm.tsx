@@ -59,7 +59,7 @@ export const LeadUpdateForm = ({ lead, onUpdate }: LeadUpdateFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2 pb-4">
+      <div className="flex-1 overflow-y-auto space-y-6 pr-3 pl-2 pb-4">
         <div>
           <h3 className="text-lg font-semibold mb-4">Update Lead Information</h3>
 
@@ -244,7 +244,7 @@ export const LeadUpdateForm = ({ lead, onUpdate }: LeadUpdateFormProps) => {
       </div>
 
       {/* Fixed Save button */}
-      <div className="pt-4 border-t sticky bottom-0 bg-white z-10">
+      <div className="pt-4 border-t sticky bottom-0 bg-white z-10 pl-2 pr-2">
         <Button type="submit" className="w-full">
           <Save className="mr-2 h-4 w-4" />
           Save Changes
