@@ -18,12 +18,12 @@ const Index = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [groupFilter, setGroupFilter] = useState<string>("all");
 
-  const filteredLeads = groupFilter === "all" 
-    ? leads 
+  const filteredLeads = groupFilter === "all"
+    ? leads
     : leads.filter(lead => lead.assigned_group === groupFilter);
 
   const handleLeadUpdate = (updatedLead: Lead) => {
-    setLeads(leads.map(lead => 
+    setLeads(leads.map(lead =>
       lead.id === updatedLead.id ? updatedLead : lead
     ));
     setSelectedLead(updatedLead);
@@ -38,15 +38,23 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-primary" />
+              <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/src/assets/images/logoPrimary.png"
+                  alt="Logo"
+                  className="h-6 w-6 object-contain"
+                />
               </div>
+
               <div>
-                <h1 className="text-2xl font-bold">Campaign Manager</h1>
-                <p className="text-sm text-muted-foreground">Lead Management System</p>
+                <h1 className="text-2xl font-bold">
+                  <span className="text-primary">Bon</span>
+                  <span className="text-black">homiee</span>
+                </h1>
+                <p className="text-sm text-muted-foreground">Campaign Management Solution</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <Badge variant="secondary">
                 {filteredLeads.length} {filteredLeads.length === 1 ? 'Lead' : 'Leads'}
@@ -65,7 +73,7 @@ const Index = () => {
               View and manage your campaign leads
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={groupFilter} onValueChange={setGroupFilter}>
@@ -84,8 +92,8 @@ const Index = () => {
           </div>
         </div>
 
-        <LeadsTable 
-          leads={filteredLeads} 
+        <LeadsTable
+          leads={filteredLeads}
           onLeadClick={setSelectedLead}
         />
       </main>
