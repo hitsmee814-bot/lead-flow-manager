@@ -10,6 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Search, ArrowUpDown } from "lucide-react";
 import { Badge } from "@/components/Badge";
 
@@ -69,93 +75,176 @@ export const LeadsTable = ({ leads, onLeadClick }: LeadsTableProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by name, phone, city, country, platform..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9"
-        />
-      </div>
+    <TooltipProvider>
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, phone, city, country, platform..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
 
-      <div className="rounded-lg border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <Button variant="ghost" size="sm" onClick={() => handleSort("id")}>
-                  ID
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button variant="ghost" size="sm" onClick={() => handleSort("platform")}>
-                  Platform
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button variant="ghost" size="sm" onClick={() => handleSort("country")}>
-                  Country
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button variant="ghost" size="sm" onClick={() => handleSort("when")}>
-                  When
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>City</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Group</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAndSortedLeads.map((lead) => (
-              <TableRow
-                key={lead.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => onLeadClick(lead)}
-              >
-                <TableCell className="font-medium">{lead.id}</TableCell>
-                <TableCell>{lead.platform}</TableCell>
-                <TableCell>{lead.country}</TableCell>
-                <TableCell className="whitespace-nowrap">{lead.when}</TableCell>
-                <TableCell>{lead.duration}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {lead.first_name} {lead.last_name}
-                </TableCell>
-                <TableCell>{lead.phone_number}</TableCell>
-                <TableCell>{lead.email}</TableCell>
-                <TableCell>{lead.city}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {lead.category && (
-                    <Badge variant={getCategoryVariant(lead.category)}>
-                      {lead.category}
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {lead.assigned_group && (
-                    <Badge variant="secondary">{lead.assigned_group}</Badge>
-                  )}
-                </TableCell>
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("id")}>
+                    ID
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("platform")}>
+                    Platform
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("country")}>
+                    Country
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("when")}>
+                    When
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>City</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Group</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredAndSortedLeads.map((lead) => (
+                <TableRow
+                  key={lead.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => onLeadClick(lead)}
+                >
+                  <TableCell className="font-medium max-w-[80px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.id}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.id}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[120px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.platform}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.platform}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[120px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.country}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.country}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[150px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.when}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.when}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[100px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.duration}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.duration}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[150px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">
+                          {lead.first_name} {lead.last_name}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.first_name} {lead.last_name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[130px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.phone_number}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.phone_number}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[180px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.email}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.email}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="max-w-[120px]">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate">{lead.city}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{lead.city}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {lead.category && (
+                      <Badge variant={getCategoryVariant(lead.category)}>
+                        {lead.category}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {lead.assigned_group && (
+                      <Badge variant="secondary">{lead.assigned_group}</Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
-      <div className="text-sm text-muted-foreground">
-        Showing {filteredAndSortedLeads.length} of {leads.length} leads
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredAndSortedLeads.length} of {leads.length} leads
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
