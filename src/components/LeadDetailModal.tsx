@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Lead, Interaction } from "@/types/lead";
 import {
   Dialog,
@@ -27,36 +26,41 @@ export const LeadDetailModal = ({
   if (!lead) return null;
 
   return (
-    <Dialog open={!!lead} onOpenChange={onClose}>
+    <Dialog
+      open={!!lead}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="max-w-7xl h-[90vh] p-0">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-2xl">
             Lead Details - {lead.first_name} {lead.last_name}
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="grid grid-cols-12 gap-6 p-6 overflow-hidden h-full">
-          {/* Left Panel - Lead Details */}
-          <div className="col-span-3 border-r pr-6">
+        <div className="grid grid-cols-12 gap-6 p-6 h-full overflow-hidden">
+          {/* Left */}
+          <div className="col-span-3 border-r pr-6 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
               <LeadDetailPanel lead={lead} />
             </ScrollArea>
           </div>
 
-          {/* Middle Panel - Update Form */}
-          <div className="col-span-5 border-r pr-6">
+          {/* Middle */}
+          <div className="col-span-5 border-r pr-6 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
               <LeadUpdateForm lead={lead} onUpdate={onUpdate} />
             </ScrollArea>
           </div>
 
-          {/* Right Panel - Interaction History */}
-          <div className="col-span-4">
+          {/* Right */}
+          <div className="col-span-4 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
               <InteractionTimeline interactions={interactions} />
             </ScrollArea>
           </div>
         </div>
+
       </DialogContent>
     </Dialog>
   );
