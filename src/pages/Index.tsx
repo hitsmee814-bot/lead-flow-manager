@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { LeadsTable } from "@/components/LeadsTable";
 import { LeadDetailModal } from "@/components/LeadDetailModal";
 import { mockLeads, mockInteractions } from "@/data/mockLeads";
 import { Lead } from "@/types/lead";
-import { Users, Filter } from "lucide-react";
+import { Users, Filter, LogOut } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,12 +12,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/Badge";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>(mockLeads);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [groupFilter, setGroupFilter] = useState<string>("all");
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    navigate("/");
+  };
 
   const filteredLeads = groupFilter === "all" 
     ? leads 
@@ -51,6 +70,27 @@ const Index = () => {
               <Badge variant="secondary">
                 {filteredLeads.length} {filteredLeads.length === 1 ? 'Lead' : 'Leads'}
               </Badge>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to logout? You will be redirected to the login page.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>
