@@ -135,14 +135,14 @@ export const LeadsTable = ({ leads, onLeadClick }: LeadsTableProps) => {
                 <TableCell>{lead.phone_number}</TableCell>
                 <TableCell>{lead.email}</TableCell>
                 <TableCell>{lead.city}</TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {lead.category && (
                     <Badge variant={getCategoryVariant(lead.category)}>
                       {lead.category}
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {lead.assigned_group && (
                     <Badge variant="secondary">{lead.assigned_group}</Badge>
                   )}
