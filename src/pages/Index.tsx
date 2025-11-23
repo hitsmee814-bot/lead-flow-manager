@@ -65,11 +65,11 @@ const Index = () => {
     try {
       const res = await fetch(`http://150.241.244.100:51800/leads/${id}`);
       const data = await res.json();
-      toast({
-        variant: "default",
-        title: "Lead details fetched.",
-        description: "Succesfully fetch lead details.",
-      })
+      // toast({
+      //   variant: "default",
+      //   title: "Lead details fetched.",
+      //   description: "Succesfully fetch lead details.",
+      // })
       setSelectedLead(data);
     } catch (err) {
       console.error("Error fetching lead details:", err);

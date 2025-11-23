@@ -60,7 +60,7 @@ export const LeadUpdateForm = ({ lead, onUpdate }: LeadUpdateFormProps) => {
     <div className="flex flex-col h-full">
       <div className="flex-1 pr-4 pb-6">
         <form id="leadForm" onSubmit={handleSubmit} className="space-y-6 overflow-y-auto">
-          <div className="pl-2">
+          <div className="pl-2 pr-2">
             <h3 className="text-lg font-semibold mb-4">Update Lead Information</h3>
 
             <div className="space-y-4">
@@ -153,7 +153,7 @@ export const LeadUpdateForm = ({ lead, onUpdate }: LeadUpdateFormProps) => {
             </div>
           </div>
 
-          <div className="pt-4 border-t pl-2">
+          <div className="pt-4 border-t pl-2 pr-2">
             <h3 className="text-lg font-semibold mb-4">Log New Interaction</h3>
 
             <div className="space-y-4">

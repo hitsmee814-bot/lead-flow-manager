@@ -32,8 +32,11 @@ export const LeadDetailModal = ({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="max-w-7xl h-[90vh] p-0">
-        <DialogHeader className="px-6 py-4 border-b">
+      <DialogContent
+        className="max-w-7xl h-[90vh] p-0"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-2xl">
             Lead Details - {lead.first_name} {lead.last_name}
           </DialogTitle>
