@@ -10,7 +10,6 @@ import { LeadDetailPanel } from "./LeadDetailPanel";
 import { LeadUpdateForm } from "./LeadUpdateForm";
 import { InteractionTimeline } from "./InteractionTimeline";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/Badge";
 
 interface LeadDetailModalProps {
   lead: Lead | null;
@@ -29,39 +28,35 @@ export const LeadDetailModal = ({
 
   return (
     <Dialog open={!!lead} onOpenChange={onClose}>
-      <DialogContent
-        className="max-w-7xl h-[90vh] p-0 flex flex-col"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >        <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
+      <DialogContent className="max-w-7xl h-[90vh] p-0">
+        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-2xl">
-            <div className="flex items-center gap-2">
-              <Badge variant="default">Lead Details – {lead.first_name} {lead.last_name}</Badge>
-            </div>
+            Lead Details - {lead.first_name} {lead.last_name}
           </DialogTitle>
         </DialogHeader>
-
-        <div className="grid grid-cols-12 gap-6 p-6 flex-1 overflow-hidden">
-          <div className="col-span-3 border-r pr-6 overflow-hidden">
+        
+        <div className="grid grid-cols-12 gap-6 p-6 overflow-hidden h-full">
+          {/* Left Panel - Lead Details */}
+          <div className="col-span-3 border-r pr-6">
             <ScrollArea className="h-full">
               <LeadDetailPanel lead={lead} />
             </ScrollArea>
           </div>
 
-          <div className="col-span-5 border-r pr-6 overflow-hidden">
+          {/* Middle Panel - Update Form */}
+          <div className="col-span-5 border-r pr-6">
             <ScrollArea className="h-full">
               <LeadUpdateForm lead={lead} onUpdate={onUpdate} />
             </ScrollArea>
           </div>
 
-          <div className="col-span-4 overflow-hidden">
+          {/* Right Panel - Interaction History */}
+          <div className="col-span-4">
             <ScrollArea className="h-full">
               <InteractionTimeline interactions={interactions} />
             </ScrollArea>
           </div>
         </div>
-
       </DialogContent>
     </Dialog>
   );
