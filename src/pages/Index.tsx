@@ -36,6 +36,7 @@ const Index = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [groupFilter, setGroupFilter] = useState<string>("all");
   const [loadingLead, setLoadingLead] = useState(false);
+  const [leadInteractions, setLeadInteractions] = useState<any[]>([]);
 
 
   useEffect(() => {
@@ -65,21 +66,43 @@ const Index = () => {
     try {
       const res = await fetch(`http://150.241.244.100:51800/leads/${id}`);
       const data = await res.json();
-      // toast({
-      //   variant: "default",
-      //   title: "Lead details fetched.",
-      //   description: "Succesfully fetch lead details.",
-      // })
-      setSelectedLead(data);
+
+      // Fetch history in parallel
+      const history = await fetchLeadHistory(id);
+
+      setSelectedLead({
+        ...data,
+        history, // optional: attach history to lead object
+      });
+
+      setLeadInteractions(history); // <-- store separately if needed
     } catch (err) {
       console.error("Error fetching lead details:", err);
       toast({
         variant: "destructive",
         title: "Failed to load lead details",
-        description: err,
+        description: String(err),
       });
     }
   };
+
+
+  const fetchLeadHistory = async (id: string) => {
+    try {
+      const res = await fetch(`http://150.241.244.100:51800/leads/history/${id}`);
+      const data = await res.json();
+      return data; // return interactions array
+    } catch (err) {
+      console.error("Error fetching history:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to load lead history",
+        description: String(err),
+      });
+      return [];
+    }
+  };
+
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");

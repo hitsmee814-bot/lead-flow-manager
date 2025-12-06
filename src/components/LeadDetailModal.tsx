@@ -49,14 +49,12 @@ export const LeadDetailModal = ({
             </ScrollArea>
           </div>
 
-          {/* Middle */}
           <div className="col-span-5 border-r pr-6 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
-              <LeadUpdateForm lead={lead} onUpdate={onUpdate} />
+              <LeadUpdateForm lead={lead} />
             </ScrollArea>
           </div>
 
-          {/* Right */}
           <div className="col-span-4 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
               <InteractionTimeline interactions={interactions} />
