@@ -266,6 +266,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
                     <Textarea
                         className={errorClass("summary")}
                         value={formData.summary}
+                        placeholder="Give a summary of the interaction"
                         onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                     />
                 </div>
@@ -308,6 +309,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
                         type="number"
                         className={errorClass("age")}
                         value={formData.age}
+                        placeholder="Age of the person you interacted with"
                         onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                     />
                 </div>
@@ -359,6 +361,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
                         type="number"
                         className={errorClass("budget")}
                         value={formData.budget}
+                        placeholder="What is the budget of the client"
                         onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                     />
                 </div>
@@ -411,6 +414,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
                     <Textarea
                         className={errorClass("dtls_interaction")}
                         value={formData.dtls_interaction}
+                        placeholder="Any detailed notes or important point in the conversation"
                         onChange={(e) => setFormData({ ...formData, dtls_interaction: e.target.value })}
                     />
                 </div>
@@ -439,6 +443,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
                     <Input
                         className={errorClass("next_actions")}
                         value={formData.next_actions}
+                        placeholder="What is the next action?"
                         onChange={(e) => setFormData({ ...formData, next_actions: e.target.value })}
                     />
                 </div>
