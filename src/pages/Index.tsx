@@ -25,6 +25,7 @@ import {
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 
 const Index = () => {
@@ -62,20 +63,45 @@ const Index = () => {
     fetchLeads();
   }, []);
 
+  const fetchLeadInteractions = async (id: string) => {
+    try {
+      const res = await fetch(
+        `http://150.241.244.100:51800/lead_interactions/history/${id}`
+      );
+      const data = await res.json();
+      return data?.interactions || data || [];
+    } catch (err) {
+      console.error("Error fetching interactions:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to load interactions",
+        description: String(err),
+      });
+      return [];
+    }
+  };
+
+
   const fetchLeadDetails = async (id: string) => {
     try {
+      setLoadingLead(true);
+
       const res = await fetch(`http://150.241.244.100:51800/leads/${id}`);
       const data = await res.json();
 
-      // Fetch history in parallel
-      const history = await fetchLeadHistory(id);
+      // Fetch both async
+      const [history, interactions] = await Promise.all([
+        fetchLeadHistory(id),
+        fetchLeadInteractions(id),
+      ]);
 
       setSelectedLead({
         ...data,
-        history, // optional: attach history to lead object
+        history,
       });
 
-      setLeadInteractions(history); // <-- store separately if needed
+      setLeadInteractions(interactions);
+
     } catch (err) {
       console.error("Error fetching lead details:", err);
       toast({
@@ -83,8 +109,11 @@ const Index = () => {
         title: "Failed to load lead details",
         description: String(err),
       });
+    } finally {
+      setLoadingLead(false);
     }
   };
+
 
 
   const fetchLeadHistory = async (id: string) => {
@@ -215,7 +244,9 @@ const Index = () => {
         </div>
 
         {loading ? (
-          <p>Loading leads...</p>
+          <div className="flex justify-center items-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
         ) : (
           <LeadsTable
             leads={filteredLeads}
@@ -224,11 +255,21 @@ const Index = () => {
             }}
           />
         )}
+
       </main>
+
+      {loadingLead && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading lead details…</p>
+          </div>
+        </div>
+      )}
 
       <LeadDetailModal
         lead={selectedLead}
-        interactions={[]}
+        interactions={leadInteractions}
         onClose={() => setSelectedLead(null)}
         onUpdate={handleLeadUpdate}
       />

@@ -13,6 +13,7 @@ import {
 import { Save } from "lucide-react";
 import { RequiredLabel } from "./RequiredLable";
 import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 interface LeadUpdateFormProps {
     lead: any;
@@ -33,6 +34,29 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
         { unique_key: number; profession_name: string; profession_category: string }[]
     >([]);
     const [errors, setErrors] = useState<Record<string, boolean>>({});
+    const initialFormData = {
+        kind: "call",
+        direction: "incoming",
+        occurred_at: "",
+        summary: "",
+        changed_by: 1001,
+        category: "",
+        next_call_date_time: "",
+        age: lead.age || "",
+        profession: "",
+        traveller: "",
+        budget: "",
+        currency: "INR",
+        start_time_of_interaction: "",
+        end_time_of_interaction: "",
+        dtls_interaction: "",
+        summary_interaction: "",
+        next_actions: "",
+    };
+    const [formData, setFormData] = useState(initialFormData);
+    const [loading, setLoading] = useState<boolean>(true);
+
+
 
     const validateForm = () => {
         const newErrors: Record<string, boolean> = {};
@@ -104,25 +128,6 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
     const formatRequiredLabel = (str: string) =>
         str.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
-    const [formData, setFormData] = useState({
-        kind: "call",
-        direction: "incoming",
-        occurred_at: "",
-        summary: "",
-        changed_by: null,
-        category: "",
-        next_call_date_time: "",
-        age: lead.age || "",
-        profession: "",
-        traveller: "",
-        budget: "",
-        currency: "INR",
-        start_time_of_interaction: "",
-        end_time_of_interaction: "",
-        dtls_interaction: "",
-        summary_interaction: "",
-        next_actions: "",
-    });
 
     const calcDurationSeconds = () => {
         if (!formData.start_time_of_interaction || !formData.end_time_of_interaction)
@@ -145,9 +150,9 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
             });
             return;
         }
-
+        setLoading(true);
         const payload = {
-            id: lead.id,
+            id: Math.floor(Math.random() * 1000000),
             lead_id: lead.id,
             kind: formData.kind,
             direction: formData.direction,
@@ -184,28 +189,32 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
             const data = await res.json();
 
             if (!res.ok) {
-                console.error("❌ API Error:", data);
+                console.error("API Error:", data);
                 toast({
                     title: "Error",
                     description: "Failed to save interaction. Please try again.",
                     variant: "destructive", // red/error style
                 });
+                setLoading(false);
                 return;
             }
 
-            console.log("✅ Interaction saved successfully →", data);
+            console.log("Interaction saved successfully →", data);
             toast({
                 title: "Success",
                 description: "Interaction saved successfully!",
                 variant: "default",
             });
+            setLoading(false);
+            setFormData(initialFormData);
         } catch (error) {
-            console.error("❌ Network/Server error:", error);
+            console.error("Network/Server error:", error);
             toast({
                 title: "Error",
                 description: "Something went wrong while saving.",
                 variant: "destructive",
             });
+            setLoading(false);
         }
     };
     const errorClass = (field: string) => errors[field] ? "border-red-500" : "";
@@ -456,6 +465,13 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
                     Save Changes
                 </Button>
             </div>
+            {loading && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+                    <Loader2 className="h-10 w-10 animate-spin text-white" />
+                    <p className="text-white mt-3 text-sm">Saving interaction…</p>
+                </div>
+            )}
+
         </div>
     );
 };
