@@ -15,6 +15,7 @@ interface LeadDetailModalProps {
   interactions: Interaction[];
   onClose: () => void;
   onUpdate: (updatedLead: Lead) => void;
+  onRefreshInteractions: () => void;
 }
 
 export const LeadDetailModal = ({
@@ -22,6 +23,7 @@ export const LeadDetailModal = ({
   interactions,
   onClose,
   onUpdate,
+  onRefreshInteractions
 }: LeadDetailModalProps) => {
   if (!lead) return null;
 
@@ -51,7 +53,7 @@ export const LeadDetailModal = ({
 
           <div className="col-span-5 border-r pr-6 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
-              <LeadUpdateForm lead={lead} />
+              <LeadUpdateForm lead={lead} onRefreshInteractions={onRefreshInteractions}/>
             </ScrollArea>
           </div>
 

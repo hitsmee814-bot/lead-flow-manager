@@ -15,7 +15,7 @@ export const LeadStatusForm = ({ lead }) => {
     const [leadStatusList, setLeadStatusList] = useState([]);
     const [priorities, setPriorities] = useState([]);
     const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchLeadStatus = async () => {

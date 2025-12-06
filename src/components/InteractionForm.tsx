@@ -16,10 +16,12 @@ import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
 interface LeadUpdateFormProps {
-    lead: any;
+  lead: any;
+  onSuccess?: () => void;
 }
 
-export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
+
+export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
 
     const [travellerGroups, setTravellerGroups] = useState<
         { id: string; group_type: string }[]
@@ -54,7 +56,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
         next_actions: "",
     };
     const [formData, setFormData] = useState(initialFormData);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
 
 
@@ -207,6 +209,7 @@ export const InteractionForm = ({ lead }: LeadUpdateFormProps) => {
             });
             setLoading(false);
             setFormData(initialFormData);
+            onSuccess?.();
         } catch (error) {
             console.error("Network/Server error:", error);
             toast({

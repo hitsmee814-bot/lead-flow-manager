@@ -7,7 +7,12 @@ import {
 import { InteractionForm } from "./InteractionForm";
 import { LeadStatusForm } from "./LeadStatusForm";
 
-export const LeadUpdateForm = ({ lead }: any) => {
+interface LeadUpdateFormProps {
+  lead: any;
+  onRefreshInteractions: () => void;   // ⭐ add this
+}
+
+export const LeadUpdateForm = ({ lead, onRefreshInteractions }: LeadUpdateFormProps) => {
   return (
     <Tabs defaultValue="interaction" className="w-full h-full flex flex-col">
 
@@ -17,7 +22,7 @@ export const LeadUpdateForm = ({ lead }: any) => {
         <TabsTrigger
           value="interaction"
           className="data-[state=active]:bg-primary data-[state=active]:text-white 
-               rounded-md transition-all"
+         rounded-md transition-all focus:outline-none"
         >
           Interaction
         </TabsTrigger>
@@ -31,9 +36,13 @@ export const LeadUpdateForm = ({ lead }: any) => {
         </TabsTrigger>
       </TabsList>
 
-
       <TabsContent value="interaction" className="h-full">
-        <InteractionForm lead={lead} />
+        <InteractionForm
+          lead={lead}
+          onSuccess={() => {
+            onRefreshInteractions();
+          }}
+        />
       </TabsContent>
 
       <TabsContent value="status" className="h-full">

@@ -81,6 +81,19 @@ const Index = () => {
     }
   };
 
+  const refreshInteractions = async () => {
+    if (!selectedLead) return;
+
+    const interactions = await fetchLeadInteractions(selectedLead.id);
+
+    const sorted = [...(interactions?.inteactions || [])].sort(
+      (a, b) =>
+        new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
+    );
+
+    setLeadInteractions(sorted);
+  };
+
 
   const fetchLeadDetails = async (id: string) => {
     try {
@@ -100,8 +113,12 @@ const Index = () => {
         history,
       });
 
-      setLeadInteractions(interactions);
+      const sortedInteractions = [...(interactions?.inteactions || [])].sort(
+        (a, b) =>
+          new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
+      );
 
+      setLeadInteractions(sortedInteractions);
     } catch (err) {
       console.error("Error fetching lead details:", err);
       toast({
@@ -272,6 +289,7 @@ const Index = () => {
         interactions={leadInteractions}
         onClose={() => setSelectedLead(null)}
         onUpdate={handleLeadUpdate}
+        onRefreshInteractions={refreshInteractions}
       />
     </div>
   );
