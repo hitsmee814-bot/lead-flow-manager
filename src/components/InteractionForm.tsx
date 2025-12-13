@@ -14,10 +14,11 @@ import { Save } from "lucide-react";
 import { RequiredLabel } from "./RequiredLable";
 import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { DateTimePicker } from "./custom/DateTimePicker";
 
 interface LeadUpdateFormProps {
-  lead: any;
-  onSuccess?: () => void;
+    lead: any;
+    onSuccess?: () => void;
 }
 
 
@@ -195,7 +196,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                 toast({
                     title: "Error",
                     description: "Failed to save interaction. Please try again.",
-                    variant: "destructive", // red/error style
+                    variant: "destructive",
                 });
                 setLoading(false);
                 return;
@@ -244,7 +245,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Direction */}
                 <div>
                     <RequiredLabel>Direction</RequiredLabel>
                     <Select
@@ -261,18 +261,16 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Occurred At */}
                 <div>
                     <RequiredLabel>Occurred At</RequiredLabel>
-                    <Input
-                        type="datetime-local"
+                    <DateTimePicker
                         className={errorClass("occurred_at")}
                         value={formData.occurred_at}
-                        onChange={(e) => setFormData({ ...formData, occurred_at: e.target.value })}
+                        onChange={(val) => setFormData({ ...formData, occurred_at: val })}
+                        max={new Date().toISOString()}
                     />
                 </div>
 
-                {/* Summary */}
                 <div>
                     <RequiredLabel>Summary</RequiredLabel>
                     <Textarea
@@ -283,7 +281,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     />
                 </div>
 
-                {/* Category */}
                 <div>
                     <RequiredLabel>Category</RequiredLabel>
                     <Select
@@ -301,20 +298,19 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Next Call Date/Time */}
                 <div>
                     <RequiredLabel>Next Call Date/Time</RequiredLabel>
-                    <Input
-                        type="datetime-local"
+                    <DateTimePicker
                         className={errorClass("next_call_date_time")}
                         value={formData.next_call_date_time}
-                        onChange={(e) =>
-                            setFormData({ ...formData, next_call_date_time: e.target.value })
+                        min={new Date()}
+                        onChange={(val) =>
+                            setFormData({ ...formData, next_call_date_time: val })
                         }
                     />
+
                 </div>
 
-                {/* Age */}
                 <div>
                     <RequiredLabel>Age</RequiredLabel>
                     <Input
@@ -326,7 +322,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     />
                 </div>
 
-                {/* Profession */}
                 <div>
                     <RequiredLabel>Profession</RequiredLabel>
                     <Select
@@ -346,7 +341,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Traveller Type */}
                 <div>
                     <RequiredLabel>Traveller Type</RequiredLabel>
                     <Select
@@ -366,7 +360,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Budget */}
                 <div>
                     <RequiredLabel>Budget</RequiredLabel>
                     <Input
@@ -378,7 +371,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     />
                 </div>
 
-                {/* Currency */}
                 <div>
                     <RequiredLabel>Currency</RequiredLabel>
                     <Select
@@ -394,11 +386,9 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Start Time */}
                 <div>
                     <RequiredLabel>Start Time of Interaction</RequiredLabel>
-                    <Input
-                        type="datetime-local"
+                    <DateTimePicker
                         className={errorClass("start_time_of_interaction")}
                         value={formData.start_time_of_interaction}
                         onChange={(e) =>
@@ -407,11 +397,9 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     />
                 </div>
 
-                {/* End Time */}
                 <div>
                     <RequiredLabel>End Time of Interaction</RequiredLabel>
-                    <Input
-                        type="datetime-local"
+                    <DateTimePicker
                         className={errorClass("end_time_of_interaction")}
                         value={formData.end_time_of_interaction}
                         onChange={(e) =>
@@ -420,7 +408,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     />
                 </div>
 
-                {/* Detailed Notes */}
                 <div>
                     <RequiredLabel>Detailed Notes</RequiredLabel>
                     <Textarea
@@ -431,7 +418,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     />
                 </div>
 
-                {/* Interaction Summary */}
                 <div>
                     <RequiredLabel>Interaction Summary</RequiredLabel>
                     <Select
@@ -449,7 +435,6 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     </Select>
                 </div>
 
-                {/* Next Actions */}
                 <div>
                     <RequiredLabel>Next Actions</RequiredLabel>
                     <Input
@@ -462,7 +447,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
             </form>
 
 
-            <div className="sticky bottom-0 border-t bg-background py-3 px-4">
+            <div className="sticky bottom-0 border-t bg-background py-3 pr-4">
                 <Button type="submit" form="leadForm" className="w-full">
                     <Save className="mr-2 h-4 w-4" />
                     Save Changes

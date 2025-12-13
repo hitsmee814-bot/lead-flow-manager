@@ -242,7 +242,7 @@ export const LeadStatusForm = ({ lead }) => {
                 </div>
             </form>
 
-            <div className="sticky bottom-0 border-t bg-background py-3 px-4">
+            <div className="sticky bottom-0 border-t bg-background py-3 pr-4">
                 <Button type="submit" form="statusForm" className="w-full">
                     Save Status Update
                 </Button>
