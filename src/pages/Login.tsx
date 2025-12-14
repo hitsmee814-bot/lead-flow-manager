@@ -32,12 +32,12 @@ const Login = () => {
 
     let hasError = false;
 
-    if (username !== "bonhomieeAdmin") {
+    if (username !== "BONHOMIEE_MASTER") {
       setUsernameError("Invalid username");
       hasError = true;
     }
 
-    if (password !== "bonhomieeMasterPass") {
+    if (password !== "bonhomieePass") {
       setPasswordError("Invalid password");
       hasError = true;
     }
@@ -45,7 +45,7 @@ const Login = () => {
     if (hasError) return;
 
     const sessionKey = crypto.randomUUID();
-    setSessionCookie("sessionKey", sessionKey, 30);
+    setSessionCookie("sessionKey", sessionKey, 1440);
 
     toast({
       title: "Login successful",
