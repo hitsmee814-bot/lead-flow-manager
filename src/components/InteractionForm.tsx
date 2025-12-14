@@ -391,8 +391,8 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     <DateTimePicker
                         className={errorClass("start_time_of_interaction")}
                         value={formData.start_time_of_interaction}
-                        onChange={(e) =>
-                            setFormData({ ...formData, start_time_of_interaction: e.target.value })
+                        onChange={(val) =>
+                            setFormData({ ...formData, start_time_of_interaction: val })
                         }
                     />
                 </div>
@@ -402,8 +402,8 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                     <DateTimePicker
                         className={errorClass("end_time_of_interaction")}
                         value={formData.end_time_of_interaction}
-                        onChange={(e) =>
-                            setFormData({ ...formData, end_time_of_interaction: e.target.value })
+                        onChange={(val) =>
+                            setFormData({ ...formData, end_time_of_interaction: val })
                         }
                     />
                 </div>
