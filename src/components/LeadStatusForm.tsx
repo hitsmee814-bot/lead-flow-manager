@@ -8,7 +8,7 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { toast } from "react-hot-toast";
+import { toast } from "@/components/ui/use-toast";
 import { RequiredLabel } from "./RequiredLable";
 import { Loader2 } from "lucide-react";
 export const LeadStatusForm = ({ lead }) => {
@@ -87,8 +87,11 @@ export const LeadStatusForm = ({ lead }) => {
         e.preventDefault();
 
         if (!validate()) {
-            toast.error("Please fill all required fields");
-            return;
+            toast({
+                title: "Validation Error",
+                description: "Please fill all mandatory fields",
+                className: "border-red-500 bg-red-50 text-red-900",
+            }); return;
         }
         setLoading(true);
         const payload = {
@@ -117,12 +120,19 @@ export const LeadStatusForm = ({ lead }) => {
             const data = await res.json();
 
             if (!res.ok) {
-                toast.error(data.error || "Failed to save status");
+                toast({
+                    title: "Save Failed",
+                    description: data.error || "Failed to save status",
+                    className: "border-red-500 bg-red-50 text-red-900",
+                });
                 setLoading(false);
 
             } else {
-                toast.success("Status updated successfully!");
-                // Reset form and update old_status
+                toast({
+                    title: "Success",
+                    description: "Status updated successfully!",
+                    className: "border-green-500 bg-green-50 text-green-900",
+                });
                 setStatusData({
                     old_status: {
                         id: statusData.new_status,
@@ -142,7 +152,11 @@ export const LeadStatusForm = ({ lead }) => {
             }
         } catch (err) {
             console.error("Request failed:", err);
-            toast.error("Failed to save status due to network error");
+            toast({
+                title: "Save Failed",
+                description: "Network Error",
+                className: "border-red-500 bg-red-50 text-red-900",
+            }); 
             setLoading(false);
         }
     };

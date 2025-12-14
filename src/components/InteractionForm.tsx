@@ -147,9 +147,9 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
 
         if (!validateForm()) {
             toast({
-                title: "Validation Error",
-                description: "Please fill all mandatory fields",
-                variant: "destructive",
+            title: "Validation Error",
+            description: "Please fill all mandatory fields",
+            className: "border-red-500 bg-red-50 text-red-900",
             });
             return;
         }
@@ -196,7 +196,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                 toast({
                     title: "Error",
                     description: "Failed to save interaction. Please try again.",
-                    variant: "destructive",
+                    className: "border-red-500 bg-red-50 text-red-900",
                 });
                 setLoading(false);
                 return;
@@ -206,7 +206,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
             toast({
                 title: "Success",
                 description: "Interaction saved successfully!",
-                variant: "default",
+                className: "border-green-500 bg-green-50 text-green-900",
             });
             setLoading(false);
             setFormData(initialFormData);
@@ -216,7 +216,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
             toast({
                 title: "Error",
                 description: "Something went wrong while saving.",
-                variant: "destructive",
+                className: "border-red-500 bg-red-50 text-red-900",
             });
             setLoading(false);
         }

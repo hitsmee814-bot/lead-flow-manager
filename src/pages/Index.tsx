@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LeadsTable } from "@/components/LeadsTable";
 import { LeadDetailModal } from "@/components/LeadDetailModal";
 import { Lead } from "@/types/lead";
-import { Filter, LogOut } from "lucide-react";
+import { Filter, LogOut, LogOutIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -26,11 +26,13 @@ import { Badge } from "@/components/Badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { deleteSessionCookie } from "@/util/authCookies";
 
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -102,7 +104,6 @@ const Index = () => {
       const res = await fetch(`http://150.241.244.100:51800/leads/${id}`);
       const data = await res.json();
 
-      // Fetch both async
       const [history, interactions] = await Promise.all([
         fetchLeadHistory(id),
         fetchLeadInteractions(id),
@@ -149,11 +150,23 @@ const Index = () => {
     }
   };
 
-
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    navigate("/");
+    setIsLoggingOut(true);
+
+    setTimeout(() => {
+      deleteSessionCookie("sessionKey");
+
+      toast({
+        title: "Logged out",
+        description: "You have been safely logged out.",
+        className: "border-red-500 bg-red-50 text-red-900",
+        action: <LogOutIcon className="h-5 w-5 text-red-600" />,
+      });
+
+      navigate("/", { replace: true });
+    }, 2000);
   };
+
 
   const filteredLeads =
     groupFilter === "all"
@@ -281,6 +294,15 @@ const Index = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">Loading lead details…</p>
           </div>
+        </div>
+      )}
+
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Logging you out…
+          </p>
         </div>
       )}
 
