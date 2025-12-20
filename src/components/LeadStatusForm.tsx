@@ -11,6 +11,8 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { RequiredLabel } from "./RequiredLable";
 import { Loader2 } from "lucide-react";
+import { apiFetch } from "@/util/apiClient";
+import { getSessionCookie } from "@/util/authCookies";
 export const LeadStatusForm = ({ lead }) => {
     const [leadStatusList, setLeadStatusList] = useState([]);
     const [priorities, setPriorities] = useState([]);
@@ -20,8 +22,8 @@ export const LeadStatusForm = ({ lead }) => {
     useEffect(() => {
         const fetchLeadStatus = async () => {
             try {
-                const res = await fetch("http://150.241.244.100:51800/lead_status");
-                const data = await res.json();
+                const res = await apiFetch("/lead_status");
+                const data = await res
                 setLeadStatusList(data.lead_status || []);
             } catch (err) {
                 console.error("Failed to fetch lead statuses:", err);
@@ -33,8 +35,8 @@ export const LeadStatusForm = ({ lead }) => {
     useEffect(() => {
         const fetchPriorities = async () => {
             try {
-                const res = await fetch("http://150.241.244.100:51800/priority_details");
-                const data = await res.json();
+                const res = await apiFetch("/priority_details");
+                const data = await res
                 setPriorities(data.priority_details || []);
             } catch (err) {
                 console.error("Failed to fetch priorities:", err);
@@ -43,7 +45,11 @@ export const LeadStatusForm = ({ lead }) => {
         fetchPriorities();
     }, []);
 
-    // Helper: get status label from ID
+    const getUserId = (): number => {
+        const userId = getSessionCookie("user_id");
+        return userId ? Number(userId) : 0;
+    };
+
     const getStatusLabel = (statusId) => {
         const status = leadStatusList.find(
             (s) => String(s.lead_status_id) === String(statusId)
@@ -59,12 +65,12 @@ export const LeadStatusForm = ({ lead }) => {
         on_hold: false,
         re_engage_date: "",
         follow_up_stage: "",
-        changed_by: 1001,
+        changed_by: getUserId(),
     });
 
     useEffect(() => {
         if (leadStatusList.length > 0) {
-            const lastStatusId = lead.history?.new_status || lead.status;
+            const lastStatusId = lead.history?.new_status ?? lead.status ?? "1";
             setStatusData((prev) => ({
                 ...prev,
                 old_status: { id: lastStatusId, label: getStatusLabel(lastStatusId) },
@@ -101,7 +107,7 @@ export const LeadStatusForm = ({ lead }) => {
             new_status: Number(statusData.new_status),
             reason: statusData.reason,
             priority: Number(statusData.priority || 0),
-            changed_by: 1001,
+            changed_by: getUserId(),
             on_hold: statusData.on_hold,
             re_engage_date: statusData.re_engage_date,
             follow_up_stage: Number(statusData.follow_up_stage || 0),
@@ -109,17 +115,17 @@ export const LeadStatusForm = ({ lead }) => {
         };
 
         try {
-            const res = await fetch(
-                "http://150.241.244.100:51800/leads_status_history",
+            const res = await apiFetch(
+                "/leads_status_history",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 }
             );
-            const data = await res.json();
+            const data = await res
 
-            if (!res.ok) {
+            if (!res.id) {
                 toast({
                     title: "Save Failed",
                     description: data.error || "Failed to save status",
@@ -144,7 +150,7 @@ export const LeadStatusForm = ({ lead }) => {
                     on_hold: false,
                     re_engage_date: "",
                     follow_up_stage: "",
-                    changed_by: 1001,
+                    changed_by: getUserId(),
                 });
                 setErrors({});
                 setLoading(false);
@@ -156,7 +162,7 @@ export const LeadStatusForm = ({ lead }) => {
                 title: "Save Failed",
                 description: "Network Error",
                 className: "border-red-500 bg-red-50 text-red-900",
-            }); 
+            });
             setLoading(false);
         }
     };

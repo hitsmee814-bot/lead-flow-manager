@@ -15,6 +15,8 @@ import { RequiredLabel } from "./RequiredLable";
 import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { DateTimePicker } from "./custom/DateTimePicker";
+import { apiFetch } from "@/util/apiClient";
+import { getSessionCookie } from "@/util/authCookies";
 
 interface LeadUpdateFormProps {
     lead: any;
@@ -23,6 +25,10 @@ interface LeadUpdateFormProps {
 
 
 export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
+    const getUserId = (): number => {
+        const userId = getSessionCookie("user_id");
+        return userId ? Number(userId) : 0;
+    };
 
     const [travellerGroups, setTravellerGroups] = useState<
         { id: string; group_type: string }[]
@@ -42,7 +48,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
         direction: "incoming",
         occurred_at: "",
         summary: "",
-        changed_by: 1001,
+        changed_by: getUserId(),
         category: "",
         next_call_date_time: "",
         age: lead.age || "",
@@ -72,8 +78,8 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
     useEffect(() => {
         const fetchProfessions = async () => {
             try {
-                const res = await fetch("http://150.241.244.100:51800/professions");
-                const data = await res.json();
+                const res = await apiFetch("/professions");
+                const data = await res
                 setProfessions(data.professions || []);
             } catch (err) {
                 console.error("Failed to fetch professions", err);
@@ -87,8 +93,8 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
     useEffect(() => {
         const fetchPriorities = async () => {
             try {
-                const res = await fetch("http://150.241.244.100:51800/priority_details");
-                const data = await res.json();
+                const res = await apiFetch("/priority_details");
+                const data = await res
                 setPriorities(data.priority_details || []);
             } catch (err) {
                 console.error("Failed to fetch priority details", err);
@@ -102,8 +108,8 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
     useEffect(() => {
         const fetchTravellerGroups = async () => {
             try {
-                const res = await fetch("http://150.241.244.100:51800/traveller_group");
-                const data = await res.json();
+                const res = await apiFetch("/traveller_group");
+                const data = await res
                 setTravellerGroups(data.traveller_group || []);
             } catch (err) {
                 console.error("Failed to fetch traveller groups", err);
@@ -116,8 +122,8 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
     useEffect(() => {
         const fetchLeadStatus = async () => {
             try {
-                const res = await fetch("http://150.241.244.100:51800/lead_status");
-                const data = await res.json();
+                const res = await apiFetch("/lead_status");
+                const data = await res
                 setLeadStatusList(data.lead_status || []);
             } catch (err) {
                 console.error("Failed to fetch lead status", err);
@@ -147,9 +153,9 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
 
         if (!validateForm()) {
             toast({
-            title: "Validation Error",
-            description: "Please fill all mandatory fields",
-            className: "border-red-500 bg-red-50 text-red-900",
+                title: "Validation Error",
+                description: "Please fill all mandatory fields",
+                className: "border-red-500 bg-red-50 text-red-900",
             });
             return;
         }
@@ -181,7 +187,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
         console.log("FINAL PAYLOAD →", payload);
 
         try {
-            const res = await fetch("http://150.241.244.100:51800/lead_interactions", {
+            const res = await apiFetch("/lead_interactions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -189,9 +195,9 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
                 body: JSON.stringify(payload),
             });
 
-            const data = await res.json();
+            const data = await res
 
-            if (!res.ok) {
+            if (!res.id) {
                 console.error("API Error:", data);
                 toast({
                     title: "Error",

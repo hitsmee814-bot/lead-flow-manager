@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { deleteSessionCookie } from "@/util/authCookies";
+import { apiFetch } from "@/util/apiClient";
 
 
 const Index = () => {
@@ -45,10 +46,8 @@ const Index = () => {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await fetch(
-          "http://150.241.244.100:51800/leads?limit=100&offset=0"
-        );
-        const data = await res.json();
+        const res = await apiFetch("/leads?limit=100&offset=0");
+        const data = await res;
         setLeads(data.leads);
       } catch (err) {
         console.error("Error fetching leads:", err);
@@ -67,11 +66,10 @@ const Index = () => {
 
   const fetchLeadInteractions = async (id: string) => {
     try {
-      const res = await fetch(
-        `http://150.241.244.100:51800/lead_interactions/history/${id}`
-      );
-      const data = await res.json();
-      return data?.interactions || data || [];
+      const res = await apiFetch(`/lead_interactions/history/${id}`);
+      const data: any = await res;
+      console.log("API gave interactions as ", data);
+      return data;
     } catch (err) {
       console.error("Error fetching interactions:", err);
       toast({
@@ -86,7 +84,7 @@ const Index = () => {
   const refreshInteractions = async () => {
     if (!selectedLead) return;
 
-    const interactions = await fetchLeadInteractions(selectedLead.id);
+    const interactions: any = await fetchLeadInteractions(selectedLead.id);
 
     const sorted = [...(interactions?.inteactions || [])].sort(
       (a, b) =>
@@ -101,8 +99,8 @@ const Index = () => {
     try {
       setLoadingLead(true);
 
-      const res = await fetch(`http://150.241.244.100:51800/leads/${id}`);
-      const data = await res.json();
+      const res = await apiFetch(`/leads/${id}`);
+      const data = await res
 
       const [history, interactions] = await Promise.all([
         fetchLeadHistory(id),
@@ -136,12 +134,15 @@ const Index = () => {
 
   const fetchLeadHistory = async (id: string) => {
     try {
-      const res = await fetch(`http://150.241.244.100:51800/leads/history/${id}`);
-      const data = await res.json();
-      return data; // return interactions array
+      const res = await apiFetch(`/leads/history/${id}`);
+      const data = await res
+      return data;
     } catch (err) {
-      console.error("Error fetching history:", err);
-      toast({
+      console.log(err);
+      if(err?.status === 404){
+        return;
+      }
+     toast({
         variant: "destructive",
         title: "Failed to load lead history",
         description: String(err),
@@ -154,19 +155,19 @@ const Index = () => {
     setIsLoggingOut(true);
 
     setTimeout(() => {
-      deleteSessionCookie("sessionKey");
+      deleteSessionCookie("auth_token");
+      deleteSessionCookie("user_id");
 
       toast({
         title: "Logged out",
         description: "You have been safely logged out.",
-        className: "border-red-500 bg-red-50 text-red-900",
-        action: <LogOutIcon className="h-5 w-5 text-red-600" />,
+        className: "border-blue-500 bg-blue-50 text-blue-900",
+        action: <LogOutIcon className="h-5 w-5 text-blue-600" />,
       });
 
       navigate("/", { replace: true });
     }, 2000);
   };
-
 
   const filteredLeads =
     groupFilter === "all"

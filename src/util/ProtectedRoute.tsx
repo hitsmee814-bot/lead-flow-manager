@@ -2,9 +2,9 @@ import { Navigate, Outlet } from "react-router-dom";
 import { getSessionCookie } from "./authCookies";
 
 const ProtectedRoute = () => {
-  const sessionKey = getSessionCookie("sessionKey");
+  const token = getSessionCookie("auth_token");
 
-  return sessionKey ? <Outlet /> : <Navigate to="/" replace />;
+  return token ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 export default ProtectedRoute;

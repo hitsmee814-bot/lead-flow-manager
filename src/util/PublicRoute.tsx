@@ -2,9 +2,9 @@ import { Navigate, Outlet } from "react-router-dom";
 import { getSessionCookie } from "./authCookies";
 
 const PublicRoute = () => {
-  const sessionKey = getSessionCookie("sessionKey");
+  const token = getSessionCookie("auth_token");
 
-  return sessionKey ? <Navigate to="/dashboard" replace /> : <Outlet />;
+  return token ? <Navigate to="/dashboard" replace /> : <Outlet />;
 };
 
 export default PublicRoute;

@@ -10,14 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle, Users } from "lucide-react";
+import { CheckCircle, Users, Eye, EyeOff } from "lucide-react";
 import { setSessionCookie } from "@/util/authCookies";
+import { decodeJwtPayload } from "@/util/jwt";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -27,34 +29,78 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    setIsLoading(true);
+
     e.preventDefault();
+
+    setUsernameError("");
+    setPasswordError("");
 
     let hasError = false;
 
-    if (username !== "BONHOMIEE_MASTER") {
-      setUsernameError("Invalid username");
+    if (!username.trim()) {
+      setUsernameError("Missing username");
       hasError = true;
     }
 
-    if (password !== "bonhomieePass") {
-      setPasswordError("Invalid password");
+    if (!password.trim()) {
+      setPasswordError("Missing password");
       hasError = true;
     }
 
     if (hasError) return;
 
-    const sessionKey = crypto.randomUUID();
-    setSessionCookie("sessionKey", sessionKey, 1440);
+    try {
+      const basicAuth = btoa(`${username}:${password}`);
 
-    toast({
-      title: "Login successful",
-      description: "Welcome back!",
-      className: "border-green-500 bg-green-50 text-green-900",
-      action: <CheckCircle className="h-5 w-5 text-green-600" />,
-    });
+      const res = await fetch(
+        "http://150.241.244.100:51800/api/login",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Basic ${basicAuth}`,
+          },
+        }
+      );
 
-    navigate("/dashboard");
+      if (res.status === 401) {
+        const message = await res.text();
+        setPasswordError(message || "Invalid credentials");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("Login failed");
+      }
+
+      const { token, duration } = await res.json();
+
+      const payload = decodeJwtPayload(token);
+      const userId = payload.id;
+
+      const durationMinutes = Math.ceil(duration / 60);
+
+      setSessionCookie("auth_token", token, durationMinutes);
+      setSessionCookie("user_id", String(userId), durationMinutes);
+
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+        className: "border-green-500 bg-green-50 text-green-900",
+        action: <CheckCircle className="h-5 w-5 text-green-600" />,
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description: "Unable to login. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -72,6 +118,7 @@ const Login = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Username */}
             <div className="space-y-1">
               <Label htmlFor="username">Username</Label>
               <Input
@@ -90,10 +137,8 @@ const Login = () => {
               )}
             </div>
 
-            {/* Password */}
             <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
-
               <div className="relative">
                 <Input
                   id="password"
@@ -104,9 +149,9 @@ const Login = () => {
                     setPassword(e.target.value);
                     setPasswordError("");
                   }}
-                  className={`pr-10 ${passwordError ? "border-red-500" : ""}`}
+                  className={`pr-10 ${passwordError ? "border-red-500" : ""
+                    }`}
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
@@ -120,14 +165,19 @@ const Login = () => {
                   )}
                 </button>
               </div>
-
               {passwordError && (
                 <p className="text-xs text-red-500">{passwordError}</p>
               )}
             </div>
-
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in...
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
         </CardContent>
