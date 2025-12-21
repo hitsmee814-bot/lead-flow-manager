@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LeadsTable } from "@/components/LeadsTable";
 import { LeadDetailModal } from "@/components/LeadDetailModal";
 import { Lead } from "@/types/lead";
-import { Filter, LogOut, LogOutIcon } from "lucide-react";
+import { Filter, LogOut, LogOutIcon, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -29,6 +29,8 @@ import { Loader2 } from "lucide-react";
 import { deleteSessionCookie } from "@/util/authCookies";
 import { apiFetch } from "@/util/apiClient";
 
+import { LeadInsertModal } from "@/components/LeadInsertModal";
+
 
 const Index = () => {
   const navigate = useNavigate();
@@ -43,6 +45,7 @@ const Index = () => {
   const [loadingLead, setLoadingLead] = useState(false);
   const [leadInteractions, setLeadInteractions] = useState<any[]>([]);
 
+  const [openInsertLead, setOpenInsertLead] = useState(false);
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -219,9 +222,8 @@ const Index = () => {
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">
-                  <span className="text-blue-400">Bon</span>
-                  <span className="text-black">homiee</span>
+                <h1 className="text-2xl font-bold" style={{ color: "#00AFEF" }}>
+                  Bonhomiee
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   Lead Management Solution
@@ -275,7 +277,6 @@ const Index = () => {
           <div className="flex items-center gap-3">
             <Filter className="h-4 w-4 text-muted-foreground" />
 
-            {/* Country */}
             <Select
               value={groupFilter}
               onValueChange={(value) => {
@@ -314,6 +315,14 @@ const Index = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Button
+              onClick={() => setOpenInsertLead(true)}
+              className="whitespace-nowrap flex items-center gap-2"
+              style={{ backgroundColor: "#00AFEF", color: "white" }} // custom color
+            >
+              <Plus className="w-4 h-4" />
+              Insert Lead
+            </Button>
           </div>
 
         </div>
@@ -358,6 +367,12 @@ const Index = () => {
         onUpdate={handleLeadUpdate}
         onRefreshInteractions={refreshInteractions}
       />
+
+      <LeadInsertModal
+        open={openInsertLead}
+        onClose={() => setOpenInsertLead(false)}
+      />
+
     </div>
   );
 };

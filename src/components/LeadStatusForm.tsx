@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { RequiredLabel } from "./RequiredLable";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { apiFetch } from "@/util/apiClient";
 import { getSessionCookie } from "@/util/authCookies";
 import { DateTimePicker } from "./custom/DateTimePicker";
@@ -244,12 +244,12 @@ export const LeadStatusForm = ({ lead }) => {
                         }
                     /> */}
 
-                                        <DateTimePicker
-                                            className={errorClass("occurred_at")}
-                                            value={statusData.re_engage_date}
-                                            onChange={(val) => setStatusData({ ...statusData, re_engage_date: val })}
-                                            max={new Date().toISOString()}
-                                        />
+                    <DateTimePicker
+                        className={errorClass("occurred_at")}
+                        value={statusData.re_engage_date}
+                        onChange={(val) => setStatusData({ ...statusData, re_engage_date: val })}
+                        max={new Date().toISOString()}
+                    />
                 </div>
 
                 <div>
@@ -271,8 +271,9 @@ export const LeadStatusForm = ({ lead }) => {
             </form>
 
             <div className="sticky bottom-0 bg-background py-3 pr-4">
-                <Button type="submit" form="statusForm" className="w-full">
-                    Save Status Update
+                <Button type="submit" form="statusForm" className="w-full" style={{ background: '#00AFEF', color: 'white' }}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Status
                 </Button>
             </div>
             {loading && (

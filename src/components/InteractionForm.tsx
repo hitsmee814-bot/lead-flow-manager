@@ -454,9 +454,9 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
 
 
             <div className="sticky bottom-0 bg-background py-3 pr-4">
-                <Button type="submit" form="leadForm" className="w-full">
+                <Button type="submit" form="leadForm" className="w-full" style={{background: '#00AFEF', color: 'white'}}>
                     <Save className="mr-2 h-4 w-4" />
-                    Save Changes
+                    Save Interaction
                 </Button>
             </div>
             {loading && (
