@@ -453,7 +453,7 @@ export const InteractionForm = ({ lead, onSuccess }: LeadUpdateFormProps) => {
             </form>
 
 
-            <div className="sticky bottom-0 border-t bg-background py-3 pr-4">
+            <div className="sticky bottom-0 bg-background py-3 pr-4">
                 <Button type="submit" form="leadForm" className="w-full">
                     <Save className="mr-2 h-4 w-4" />
                     Save Changes

@@ -35,7 +35,7 @@ export const LeadDetailModal = ({
       }}
     >
       <DialogContent
-        className="max-w-7xl h-[90vh] p-0"
+        className="max-w-[100rem] h-[90vh] p-0"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >        <DialogHeader className="px-6 py-4 border-b">

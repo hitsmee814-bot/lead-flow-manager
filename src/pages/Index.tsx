@@ -39,6 +39,7 @@ const Index = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [groupFilter, setGroupFilter] = useState<string>("all");
+  const [cityFilter, setCityFilter] = useState<string>("all");
   const [loadingLead, setLoadingLead] = useState(false);
   const [leadInteractions, setLeadInteractions] = useState<any[]>([]);
 
@@ -139,10 +140,10 @@ const Index = () => {
       return data;
     } catch (err) {
       console.log(err);
-      if(err?.status === 404){
+      if (err?.status === 404) {
         return;
       }
-     toast({
+      toast({
         variant: "destructive",
         title: "Failed to load lead history",
         description: String(err),
@@ -169,15 +170,34 @@ const Index = () => {
     }, 2000);
   };
 
-  const filteredLeads =
-    groupFilter === "all"
-      ? leads
-      : leads.filter((lead) => lead.destination_country === groupFilter);
+  const filteredLeads = leads.filter((lead) => {
+    const countryMatch =
+      groupFilter === "all" ||
+      lead.destination_country === groupFilter;
+
+    const cityMatch =
+      cityFilter === "all" ||
+      lead.city === cityFilter;
+
+    return countryMatch && cityMatch;
+  });
+
 
   const groups = Array.from(
     new Set(leads.map((lead) => lead.destination_country).filter(Boolean))
   );
-
+  const cities = Array.from(
+    new Set(
+      leads
+        .filter(
+          (lead) =>
+            groupFilter === "all" ||
+            lead.destination_country === groupFilter
+        )
+        .map((lead) => lead.city)
+        .filter(Boolean)
+    )
+  );
   const handleLeadUpdate = (updatedLead: Lead) => {
     setLeads((prev) =>
       prev.map((lead) => (lead.id === updatedLead.id ? updatedLead : lead))
@@ -254,24 +274,48 @@ const Index = () => {
 
           <div className="flex items-center gap-3">
             <Filter className="h-4 w-4 text-muted-foreground" />
+
+            {/* Country */}
             <Select
               value={groupFilter}
-              onValueChange={setGroupFilter}
+              onValueChange={(value) => {
+                setGroupFilter(value);
+                setCityFilter("all");
+              }}
               disabled={loading}
             >
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by destination country" />
+                <SelectValue placeholder="Filter by country" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Countries</SelectItem>
-                {groups.map((group) => (
-                  <SelectItem key={group} value={group!}>
-                    {group}
+                {groups.map((country) => (
+                  <SelectItem key={country} value={country!}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={cityFilter}
+              onValueChange={setCityFilter}
+              disabled={loading || cities.length === 0}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by city" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {cities.map((city) => (
+                  <SelectItem key={city} value={city!}>
+                    {city}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
         </div>
 
         {loading ? (

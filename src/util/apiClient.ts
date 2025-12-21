@@ -11,11 +11,11 @@ type FetchOptions = RequestInit & {
   skipAuth?: boolean;
 };
 
-const redirectToLogin = () => {
-  if (window.location.pathname !== "/bonhomiee/login") {
-    window.location.href = "/bonhomiee/login";
-  }
-};
+// const redirectToLogin = () => {
+//   if (window.location.pathname !== "/bonhomiee/login") {
+//     window.location.href = "/bonhomiee/login";
+//   }
+// };
 
 
 const extractErrorMessage = (body: any): string => {
@@ -43,8 +43,8 @@ export const apiFetch = async <T = any>(
   const authHeader =
     !skipAuth && token
       ? {
-          Authorization: `Basic ${btoa(`${token}:`)}`,
-        }
+        Authorization: `Basic ${btoa(`${token}:`)}`,
+      }
       : {};
 
   let res: Response;
@@ -86,8 +86,13 @@ export const apiFetch = async <T = any>(
     console.warn("Unauthorized (401). Redirecting to /login");
 
     deleteSessionCookie("auth_token");
+    window.dispatchEvent(
+      new CustomEvent("session-expired", {
+        detail: { status: 401 },
+      })
+    );
 
-    redirectToLogin();
+    // redirectToLogin();
 
     throw {
       status: 401,

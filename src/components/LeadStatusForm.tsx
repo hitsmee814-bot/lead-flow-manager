@@ -13,6 +13,7 @@ import { RequiredLabel } from "./RequiredLable";
 import { Loader2 } from "lucide-react";
 import { apiFetch } from "@/util/apiClient";
 import { getSessionCookie } from "@/util/authCookies";
+import { DateTimePicker } from "./custom/DateTimePicker";
 export const LeadStatusForm = ({ lead }) => {
     const [leadStatusList, setLeadStatusList] = useState([]);
     const [priorities, setPriorities] = useState([]);
@@ -235,13 +236,20 @@ export const LeadStatusForm = ({ lead }) => {
 
                 <div>
                     <RequiredLabel>Re-engage Date</RequiredLabel>
-                    <Input
+                    {/* <Input
                         type="date"
                         value={statusData.re_engage_date}
                         onChange={(e) =>
                             setStatusData({ ...statusData, re_engage_date: e.target.value })
                         }
-                    />
+                    /> */}
+
+                                        <DateTimePicker
+                                            className={errorClass("occurred_at")}
+                                            value={statusData.re_engage_date}
+                                            onChange={(val) => setStatusData({ ...statusData, re_engage_date: val })}
+                                            max={new Date().toISOString()}
+                                        />
                 </div>
 
                 <div>
@@ -262,7 +270,7 @@ export const LeadStatusForm = ({ lead }) => {
                 </div>
             </form>
 
-            <div className="sticky bottom-0 border-t bg-background py-3 pr-4">
+            <div className="sticky bottom-0 bg-background py-3 pr-4">
                 <Button type="submit" form="statusForm" className="w-full">
                     Save Status Update
                 </Button>

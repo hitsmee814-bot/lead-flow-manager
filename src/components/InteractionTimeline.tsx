@@ -1,10 +1,11 @@
-import { Clock, User, Info } from "lucide-react";
+import { Clock, User, Info, Sparkles } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 
 interface InteractionTimelineProps {
   interactions: any[];
@@ -32,14 +33,42 @@ export const InteractionTimeline = ({ interactions }: InteractionTimelineProps) 
 
   if (list.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground text-sm">No interactions recorded yet</p>
+      <div className="text-center py-0">
+        <div className="rounded-xl border bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="h-4 w-4 text-indigo-500" />
+          <h3 className="text-sm font-semibold text-indigo-700">
+            AI Summary (DUMMY TEXT)
+          </h3>
+        </div>
+
+        <p className="text-xs text-indigo-900 leading-relaxed">
+          This lead has shown consistent interest with multiple interactions over
+          the past few weeks. Budget discussions indicate medium to high intent,
+          and follow-up actions suggest readiness for the next engagement step.
+        </p>
+      </div>
+        <p className="text-muted-foreground text-sm mt-4">No interactions recorded yet</p> 
       </div>
     );
   }
 
   return (
     <div className="space-y-5">
+      <div className="rounded-xl border bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="h-4 w-4 text-indigo-500" />
+          <h3 className="text-sm font-semibold text-indigo-700">
+            AI Summary (DUMMY TEXT)
+          </h3>
+        </div>
+
+        <p className="text-xs text-indigo-900 leading-relaxed">
+          This lead has shown consistent interest with multiple interactions over
+          the past few weeks. Budget discussions indicate medium to high intent,
+          and follow-up actions suggest readiness for the next engagement step.
+        </p>
+      </div>
       <h3 className="text-lg font-semibold mb-2">Interaction History</h3>
 
       <TooltipProvider delayDuration={0}>

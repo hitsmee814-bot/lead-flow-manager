@@ -9,7 +9,7 @@ import { LeadStatusForm } from "./LeadStatusForm";
 
 interface LeadUpdateFormProps {
   lead: any;
-  onRefreshInteractions: () => void;   // ⭐ add this
+  onRefreshInteractions: () => void;
 }
 
 export const LeadUpdateForm = ({ lead, onRefreshInteractions }: LeadUpdateFormProps) => {
@@ -17,23 +17,49 @@ export const LeadUpdateForm = ({ lead, onRefreshInteractions }: LeadUpdateFormPr
     <Tabs defaultValue="interaction" className="w-full h-full flex flex-col">
 
       <TabsList
-        className="grid grid-cols-2 w-full sticky top-0 z-10 bg-background border-b p-1 shadow-sm rounded-md"
+        className="grid grid-cols-2 w-full sticky top-0 z-10 bg-background border border-border p-1 shadow-sm rounded-md"
       >
         <TabsTrigger
           value="interaction"
-          className="data-[state=active]:bg-primary data-[state=active]:text-white 
-         rounded-md transition-all focus:outline-none"
+          className="
+    data-[state=active]:bg-primary
+    data-[state=active]:text-white
+    rounded-md
+    transition-all
+
+    px-3
+    py-2
+    leading-none
+
+    focus:outline-none
+    focus-visible:ring-0
+    focus-visible:ring-offset-0
+  "
         >
           Interaction
         </TabsTrigger>
 
+
         <TabsTrigger
           value="status"
-          className="data-[state=active]:bg-primary data-[state=active]:text-white 
-               rounded-md transition-all"
+          className="
+    data-[state=active]:bg-primary
+    data-[state=active]:text-white
+    rounded-md
+    transition-all
+
+    px-3
+    py-2
+    leading-none
+
+    focus:outline-none
+    focus-visible:ring-0
+    focus-visible:ring-offset-0
+  "
         >
           Status Update
         </TabsTrigger>
+
       </TabsList>
 
       <TabsContent value="interaction" className="h-full">
