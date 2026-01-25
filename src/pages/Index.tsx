@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LeadsTable } from "@/components/LeadsTable";
 import { LeadDetailModal } from "@/components/LeadDetailModal";
 import { Lead } from "@/types/lead";
-import { Filter, LogOut, LogOutIcon, Plus } from "lucide-react";
+import { Filter, LogOut, LogOutIcon, Plus, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -44,29 +44,51 @@ const Index = () => {
   const [cityFilter, setCityFilter] = useState<string>("all");
   const [loadingLead, setLoadingLead] = useState(false);
   const [leadInteractions, setLeadInteractions] = useState<any[]>([]);
+  const [leadFirstCall, setLeadFirstCall] = useState<null>(null);
 
   const [openInsertLead, setOpenInsertLead] = useState(false);
 
-  useEffect(() => {
-    const fetchLeads = async () => {
-      try {
-        const res = await apiFetch("/leads?limit=100&offset=0");
-        const data = await res;
-        setLeads(data.leads);
-      } catch (err) {
-        console.error("Error fetching leads:", err);
-        toast({
-          variant: "destructive",
-          title: "Failed to load leads",
-          description: "Please try again later.",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchLeads = async () => {
+    try {
+      setLoading(true);
 
+      const res = await apiFetch("/leads?limit=100&offset=0");
+      const data = await res;
+
+      setLeads(data.leads);
+    } catch (err) {
+      console.error("Error fetching leads:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to load leads",
+        description: "Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchLeads();
   }, []);
+
+  const handleRefreshLeads = async () => {
+    setGroupFilter("all");
+    setCityFilter("all");
+
+    setSelectedLead(null);
+    setLeadInteractions([]);
+    setLeadFirstCall(null);
+
+    await fetchLeads();
+
+    toast({
+      variant: "default",
+      title: "Leads refreshed",
+      description: "Latest leads have been loaded.",
+    });
+  };
+
 
   const fetchLeadInteractions = async (id: string) => {
     try {
@@ -85,12 +107,29 @@ const Index = () => {
     }
   };
 
+  const fetchLeadFirstCall = async (id: string) => {
+    try {
+      const res = await apiFetch(`/lead_interactions/first_call/${id}`);
+      const data: any = await res;
+      console.log("API gave first call as ", data);
+      return data;
+    } catch (err) {
+      console.error("Error fetching first call:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to load first call details",
+        description: String(err),
+      });
+      return [];
+    }
+  };
+
   const refreshInteractions = async () => {
     if (!selectedLead) return;
 
     const interactions: any = await fetchLeadInteractions(selectedLead.id);
 
-    const sorted = [...(interactions?.inteactions || [])].sort(
+    const sorted = [...(interactions?.interactions || [])].sort(
       (a, b) =>
         new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
     );
@@ -106,22 +145,29 @@ const Index = () => {
       const res = await apiFetch(`/leads/${id}`);
       const data = await res
 
-      const [history, interactions] = await Promise.all([
+      const [history, interactions, firstCall] = await Promise.all([
         fetchLeadHistory(id),
         fetchLeadInteractions(id),
+        fetchLeadFirstCall(id)
       ]);
+
+      const firstCallInteraction =
+      firstCall?.interactions?.length > 0
+        ? firstCall.interactions[0]
+        : null;
 
       setSelectedLead({
         ...data,
         history,
       });
 
-      const sortedInteractions = [...(interactions?.inteactions || [])].sort(
+      const sortedInteractions = [...(interactions?.interactions || [])].sort(
         (a, b) =>
           new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
       );
 
       setLeadInteractions(sortedInteractions);
+      setLeadFirstCall(firstCallInteraction);
     } catch (err) {
       console.error("Error fetching lead details:", err);
       toast({
@@ -323,6 +369,17 @@ const Index = () => {
               <Plus className="w-4 h-4" />
               Insert Lead
             </Button>
+            <Button
+            onClick={handleRefreshLeads}
+            className="whitespace-nowrap flex items-center gap-2"
+            style={{ backgroundColor: "#00AFEF", color: "white" }}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
           </div>
 
         </div>
@@ -363,6 +420,7 @@ const Index = () => {
       <LeadDetailModal
         lead={selectedLead}
         interactions={leadInteractions}
+        firstCall={leadFirstCall}
         onClose={() => setSelectedLead(null)}
         onUpdate={handleLeadUpdate}
         onRefreshInteractions={refreshInteractions}

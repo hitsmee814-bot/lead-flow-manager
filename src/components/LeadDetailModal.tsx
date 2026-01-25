@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface LeadDetailModalProps {
   lead: Lead | null;
   interactions: Interaction[];
+  firstCall:any,
   onClose: () => void;
   onUpdate: (updatedLead: Lead) => void;
   onRefreshInteractions: () => void;
@@ -21,6 +22,7 @@ interface LeadDetailModalProps {
 export const LeadDetailModal = ({
   lead,
   interactions,
+  firstCall,
   onClose,
   onUpdate,
   onRefreshInteractions
@@ -59,7 +61,7 @@ export const LeadDetailModal = ({
 
           <div className="col-span-4 h-full flex flex-col min-h-0">
             <ScrollArea className="h-full">
-              <InteractionTimeline interactions={interactions} />
+              <InteractionTimeline interactions={interactions} firstCall={firstCall}/>
             </ScrollArea>
           </div>
         </div>
