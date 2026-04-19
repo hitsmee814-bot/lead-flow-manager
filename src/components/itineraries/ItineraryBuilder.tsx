@@ -10,6 +10,8 @@ import TourPreview from "./Preview";
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, XCircle } from "lucide-react";
 
 type Props = {
     onCancel: () => void;
@@ -20,9 +22,9 @@ export default function ItineraryBuilder({
     onCancel,
     itineraryData,
 }: Props) {
+    const { toast } = useToast();
     const [step, setStep] = useState(1); // cleaner UX
     const [showPreview, setShowPreview] = useState(false);
-
     const steps = [
         { id: 1, label: "Package" },
         { id: 2, label: "Itinerary" },
@@ -64,7 +66,7 @@ export default function ItineraryBuilder({
             };
         }
 
-        const tour = t.tour ?? t; // 🔥 handles both shapes
+        const tour = t.tour ?? t;
 
         return {
             tour: {
@@ -144,7 +146,6 @@ export default function ItineraryBuilder({
         try {
             const payload = {
                 tour: formData.tour,
-
                 availability: formData.availability.map((a: any) => ({
                     start_date: a.start_date || "",
                     end_date: a.end_date || "",
@@ -162,6 +163,7 @@ export default function ItineraryBuilder({
                         days_before: Number(c.days_before),
                         refund_percentage: Number(c.refund_percentage),
                     })),
+
                 accommodations: (formData.accommodations || []).map((h: any) => ({
                     hotel_name: h.hotel_name,
                     location: h.location,
@@ -172,15 +174,11 @@ export default function ItineraryBuilder({
                 itinerary_days: formData.itinerary_days.map((d: any) => ({
                     date: d.date || new Date().toISOString().split("T")[0],
                     day_number: Number(d.day_number),
-
                     title: d.title || "",
                     description: d.description || "",
-
-                    // 🔥 IMPORTANT: map UI → API correctly
                     hotel_name: d.hotel || "",
                     distance_km: Number(d.distance || 0),
                     travel_time: d.travelTime || "",
-
                     activities: (d.activities || []).map((a: any) => ({
                         name: a.name,
                         type: a.type,
@@ -188,30 +186,59 @@ export default function ItineraryBuilder({
                         latitude: Number(a.latitude),
                         longitude: Number(a.longitude),
                     })),
-
                     images: d.images || [],
-                }))
+                })),
             };
 
-            const res = await fetch("http://150.241.244.100:8000/itinerary/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
+            console.log(payload);
+
+            const res = await fetch(
+                "http://150.241.244.100:8000/itinerary/create",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
 
             const data = await res.json();
 
             if (!res.ok) {
                 console.error("CREATE ITINERARY FAILED:", data);
+
+                toast({
+                    title: "Failed to create itinerary",
+                    description:
+                        data?.message || "Something went wrong. Please try again.",
+                    className: "border-red-500 bg-red-50 text-red-900",
+                });
+
                 return;
             }
 
             console.log("ITINERARY CREATED SUCCESSFULLY:", data);
+            toast({
+                title: "Itinerary created 🎉",
+                description: "Refreshing list...",
+                className: "border-green-500 bg-green-50 text-green-900",
+            });
 
+            setFormData(getInitialState());
+            setStep(1);
+
+            setTimeout(() => {
+                onCancel();
+            }, 500);
         } catch (err) {
             console.error("API ERROR:", err);
+
+            toast({
+                title: "Network error",
+                description: "Unable to reach server. Please try again.",
+                className: "border-red-500 bg-red-50 text-red-900",
+            });
         }
     };
 
@@ -229,6 +256,34 @@ export default function ItineraryBuilder({
     const back = () => {
         if (step > 1) setStep(step - 1);
     };
+
+    const getInitialState = () => ({
+        tour: {
+            id: null,
+            title: "",
+            description: "",
+            duration_days: 1,
+            duration_nights: 0,
+            start_date: "",
+            end_date: "",
+            origin_city: "",
+            destination: "",
+            base_price: 0,
+            currency: "INR",
+            max_guests: 0,
+            avg_rating: 0,
+            total_reviews: 0,
+            status: "draft",
+            is_active: true,
+            created_at: "",
+            published_at: "",
+        },
+        availability: [],
+        images: [],
+        cancellation_policy: [],
+        accommodations: [],
+        itinerary_days: [],
+    });
 
     return (
         <div className="space-y-6 pb-24">

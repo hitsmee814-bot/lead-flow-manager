@@ -10,7 +10,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
 import useEmblaCarousel from "embla-carousel-react";
 
 /* ================= MAIN ================= */
@@ -38,6 +37,25 @@ export default function TourPreview({
 
                         <HeroSection data={data} />
 
+                        {/* ================= TOUR OVERVIEW ================= */}
+                        <Section title="Tour Overview">
+                            <Card className="p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <Info label="Title" value={data?.tour?.title} />
+                                <Info label="Origin" value={data?.tour?.origin_city} />
+                                <Info label="Destination" value={data?.tour?.destination} />
+                                <Info label="Duration" value={`${data?.tour?.duration_days} Days / ${data?.tour?.duration_nights} Nights`} />
+                                <Info label="Base Price" value={`${data?.tour?.currency} ${data?.tour?.base_price}`} />
+                                <Info label="Max Guests" value={data?.tour?.max_guests} />
+                                <Info label="Status" value={data?.tour?.status} />
+                                <Info label="Rating" value={data?.tour?.avg_rating || 0} />
+                                <Info label="Reviews" value={data?.tour?.total_reviews || 0} />
+                            </Card>
+
+                            <p className="text-sm text-muted-foreground mt-4">
+                                {data?.tour?.description || "-"}
+                            </p>
+                        </Section>
+
                         {/* ================= GALLERY ================= */}
                         <Section title="Gallery">
                             {data?.images?.length ? (
@@ -47,66 +65,76 @@ export default function TourPreview({
                             )}
                         </Section>
 
-                        {/* ================= TOUR ================= */}
-                        <Section title="Tour Overview">
-                            <Card className="p-5 grid grid-cols-2 gap-4">
-                                <Info label="Title" value={data?.tour?.title} />
-                                <Info label="Destination" value={data?.tour?.destination} />
-                                <Info label="Origin" value={data?.tour?.origin_city} />
-                                <Info
-                                    label="Duration"
-                                    value={`${data?.tour?.duration_days}D / ${data?.tour?.duration_nights}N`}
-                                />
-                                <Info
-                                    label="Price"
-                                    value={`${data?.tour?.currency} ${data?.tour?.base_price}`}
-                                />
-                                <Info label="Max Guests" value={data?.tour?.max_guests} />
-                            </Card>
+                        {/* ================= AVAILABILITY (ENHANCED) ================= */}
+                        <Section title="Availability & Pricing">
+                            {data?.availability?.length ? (
+                                <div className="space-y-3">
+                                    {data.availability.map((a: any) => (
+                                        <Card key={a.id} className="p-4 flex justify-between items-center">
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-medium">
+                                                    {a.start_date} → {a.end_date}
+                                                </p>
 
-                            <p className="text-sm text-muted-foreground mt-4">
-                                {data?.tour?.description || "-"}
-                            </p>
+                                                <div className="flex gap-3 text-xs text-muted-foreground">
+                                                    <span>💰 ₹{a.price}</span>
+                                                    <span>🎟 Slots: {a.available_slots}/{a.total_slots}</span>
+                                                </div>
+                                            </div>
+
+                                            <Badge
+                                                className={
+                                                    a.status === "available"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
+                                                }
+                                            >
+                                                {a.status}
+                                            </Badge>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Empty text="No availability set" />
+                            )}
                         </Section>
 
                         {/* ================= ITINERARY ================= */}
-                        <Section title="Itinerary">
+                        <Section title="Day-wise Itinerary">
                             {data?.itinerary_days?.length ? (
-                                <div className="space-y-4">
+                                <div className="space-y-5">
                                     {data.itinerary_days.map((day: any, i: number) => (
                                         <Card key={day.id} className="p-5 border-l-4 border-[#00AFEF]">
 
-                                            {/* HEADER */}
-                                            <div className="flex justify-between items-start">
+                                            <div className="flex justify-between">
                                                 <h3 className="font-semibold">
                                                     Day {day.day_number || i + 1}
                                                 </h3>
-
-                                                <span className="text-sm font-medium text-[#00AFEF]">
-                                                    {day.title || "No title"}
+                                                <span className="text-[#00AFEF] font-medium text-sm">
+                                                    {day.title}
                                                 </span>
                                             </div>
 
-                                            {/* DESCRIPTION */}
                                             <p className="text-sm text-muted-foreground mt-2">
-                                                {day.description || "No description"}
+                                                {day.description}
                                             </p>
 
-                                            {/* ACTIVITIES */}
+                                            {/* Activities */}
                                             <div className="mt-4">
-                                                <p className="text-xs font-medium text-gray-500 mb-2">
+                                                <p className="text-xs font-semibold text-gray-500 mb-2">
                                                     Activities
                                                 </p>
 
                                                 <div className="flex flex-wrap gap-2">
                                                     {day.activities?.length ? (
                                                         day.activities.map((a: any) => (
-                                                            <span
+                                                            <Badge
                                                                 key={a.id}
-                                                                className="text-xs px-2 py-1 rounded-full border bg-gray-50"
+                                                                variant="outline"
+                                                                className="text-xs"
                                                             >
-                                                                {a.name}
-                                                            </span>
+                                                                {a.name} ({a.type})
+                                                            </Badge>
                                                         ))
                                                     ) : (
                                                         <span className="text-xs text-muted-foreground">
@@ -116,25 +144,18 @@ export default function TourPreview({
                                                 </div>
                                             </div>
 
-                                            {/* IMAGES */}
-                                            <div className="mt-4">
-                                                {day.images?.length ? (
-                                                    <div className="flex gap-2 overflow-x-auto">
-                                                        {day.images.map((img: any, idx: number) => (
-                                                            <img
-                                                                key={idx}
-                                                                src={img.image_url}
-                                                                className="h-24 w-32 object-cover rounded-md border"
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground">
-                                                        No images
-                                                    </span>
-                                                )}
-                                            </div>
-
+                                            {/* Images */}
+                                            {day.images?.length > 0 && (
+                                                <div className="mt-4 flex gap-2 overflow-x-auto">
+                                                    {day.images.map((img: any, idx: number) => (
+                                                        <img
+                                                            key={idx}
+                                                            src={img.image_url}
+                                                            className="h-24 w-32 object-cover rounded-md border"
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
                                         </Card>
                                     ))}
                                 </div>
@@ -143,10 +164,10 @@ export default function TourPreview({
                             )}
                         </Section>
 
-                        {/* ================= HOTELS ================= */}
-                        <Section title="Hotels">
+                        {/* ================= ACCOMMODATION ================= */}
+                        <Section title="Accommodation Plan">
                             {data?.accommodations?.length ? (
-                                <div className="grid gap-3">
+                                <div className="space-y-3">
                                     {data.accommodations.map((h: any) => (
                                         <Card key={h.id} className="p-4 flex justify-between">
                                             <div>
@@ -156,52 +177,25 @@ export default function TourPreview({
                                                 </p>
                                             </div>
 
-                                            <Badge variant="secondary">
+                                            <Badge>
                                                 {h.nights} Nights • {h.meal_plan}
                                             </Badge>
                                         </Card>
                                     ))}
                                 </div>
                             ) : (
-                                <Empty text="No hotels added yet" />
+                                <Empty text="No accommodations added" />
                             )}
                         </Section>
 
-                        {/* ================= AVAILABILITY ================= */}
-                        <Section title="Availability">
-                            {data?.availability?.length ? (
-                                <div className="grid gap-2">
-                                    {data.availability.map((a: any) => (
-                                        <Card
-                                            key={a.id}
-                                            className="p-3 flex justify-between"
-                                        >
-                                            <span className="text-sm">
-                                                {a.start_date} → {a.end_date}
-                                            </span>
-
-                                            <Badge>
-                                                {a.status}
-                                            </Badge>
-                                        </Card>
-                                    ))}
-                                </div>
-                            ) : (
-                                <Empty text="No availability slots defined" />
-                            )}
-                        </Section>
-
-                        {/* ================= POLICY ================= */}
+                        {/* ================= CANCELLATION POLICY ================= */}
                         <Section title="Cancellation Policy">
                             {data?.cancellation_policy?.length ? (
                                 <div className="grid gap-2">
                                     {data.cancellation_policy.map((c: any) => (
-                                        <Card
-                                            key={c.id}
-                                            className="p-3 flex justify-between"
-                                        >
+                                        <Card key={c.id} className="p-3 flex justify-between">
                                             <span className="text-sm">
-                                                Cancel {c.days_before} days before
+                                                Cancel {c.days_before} days before departure
                                             </span>
 
                                             <Badge>
@@ -211,7 +205,7 @@ export default function TourPreview({
                                     ))}
                                 </div>
                             ) : (
-                                <Empty text="No cancellation policy set" />
+                                <Empty text="No cancellation policy defined" />
                             )}
                         </Section>
 
@@ -237,46 +231,30 @@ function HeroSection({ data }: any) {
 
             <div className="flex gap-2 mt-3 flex-wrap">
                 <Badge>{data?.tour?.duration_days} Days</Badge>
-                <Badge>{data?.tour?.max_guests} Guests</Badge>
-                <Badge>
-                    {data?.tour?.currency} {data?.tour?.base_price}
-                </Badge>
+                <Badge>{data?.tour?.duration_nights} Nights</Badge>
+                <Badge>₹ {data?.tour?.base_price}</Badge>
+                <Badge>{data?.tour?.status}</Badge>
             </div>
         </Card>
     );
 }
 
 /* ================= IMAGE CAROUSEL ================= */
+
 function ImageCarousel({ images }: { images: any[] }) {
     const [emblaRef] = useEmblaCarousel({ loop: true });
 
     return (
         <div className="overflow-hidden rounded-xl border" ref={emblaRef}>
             <div className="flex">
-                {images.map((img: any, i: number) => {
-
-                    let src = "";
-
-                    if (typeof img === "string") {
-                        src = img;
-                    }
-                    else if (img instanceof File || img instanceof Blob) {
-                        src = URL.createObjectURL(img);
-                    }
-                    else if (img?.image_url) {
-                        src = img.image_url;
-                    }
-
-                    return (
-                        <div key={i} className="min-w-full h-[320px]">
-                            <img
-                                src={src}
-                                className="w-full h-full object-cover"
-                                alt=""
-                            />
-                        </div>
-                    );
-                })}
+                {images.map((img: any, i: number) => (
+                    <div key={i} className="min-w-full h-[320px]">
+                        <img
+                            src={img?.image_url}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                ))}
             </div>
         </div>
     );
