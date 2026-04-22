@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
-
 import { Slider } from "@/components/ui/slider";
 
 type Policy = {
     id: string;
-    days_before: number;
+    days_before: number | "";
     refund_percentage: number;
 };
 
@@ -26,19 +25,17 @@ export default function Step5CancellationPolicy({
     data: Policy[];
     setData: (v: Policy[]) => void;
 }) {
-    /* ---------------- ADD ---------------- */
     const addPolicy = () => {
         setData([
             ...data,
             {
                 id: crypto.randomUUID(),
-                days_before: 0,
+                days_before: "",
                 refund_percentage: 0,
             },
         ]);
     };
 
-    /* ---------------- UPDATE ---------------- */
     const update = (id: string, key: string, value: any) => {
         setData(
             data.map((item) =>
@@ -47,14 +44,12 @@ export default function Step5CancellationPolicy({
         );
     };
 
-    /* ---------------- DELETE ---------------- */
     const remove = (id: string) => {
         setData(data.filter((item) => item.id !== id));
     };
 
     return (
         <div className="space-y-4">
-
             {/* HEADER */}
             <div className="flex justify-between items-center">
                 <div>
@@ -85,7 +80,6 @@ export default function Step5CancellationPolicy({
             {/* LIST */}
             {data.map((item, index) => (
                 <Card key={item.id} className="p-5 space-y-5">
-
                     {/* HEADER */}
                     <div className="flex justify-between items-center">
                         <p className="font-medium">
@@ -101,21 +95,21 @@ export default function Step5CancellationPolicy({
                         </Button>
                     </div>
 
-                    {/* GRID */}
                     <div className="grid grid-cols-2 gap-4">
-
                         {/* DAYS BEFORE */}
                         <div className="space-y-1">
                             <Label>Days Before Departure</Label>
 
                             <Input
                                 type="number"
-                                value={item.days_before}
+                                value={item.days_before ?? ""}
                                 onChange={(e) =>
                                     update(
                                         item.id,
                                         "days_before",
-                                        Number(e.target.value)
+                                        e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
                                     )
                                 }
                                 placeholder="e.g. 30"
@@ -125,12 +119,9 @@ export default function Step5CancellationPolicy({
                         {/* REFUND % */}
                         <div className="space-y-2">
                             <Label>Refund Percentage</Label>
+
                             <Slider
-                                value={[
-                                    typeof item.refund_percentage === "number"
-                                        ? item.refund_percentage
-                                        : 0,
-                                ]}
+                                value={[item.refund_percentage || 0]}
                                 min={0}
                                 max={100}
                                 step={5}
@@ -142,11 +133,11 @@ export default function Step5CancellationPolicy({
                                     )
                                 }
                             />
+
                             <div className="text-sm text-muted-foreground">
                                 {item.refund_percentage}% refund
                             </div>
                         </div>
-
                     </div>
                 </Card>
             ))}

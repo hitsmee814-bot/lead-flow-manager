@@ -13,15 +13,14 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { format } from "date-fns";
 
 type Availability = {
-    id: string;
+    id: string; // UI only
     start_date: string;
     end_date: string;
-    price: number;
-    total_slots: number;
-    available_slots: number;
+    price: number | "";
+    total_slots: number | "";
+    available_slots: number; // derived
     status: "available" | "closed" | "sold_out";
 };
 
@@ -39,33 +38,38 @@ export default function Step4Availability({
     setData: (v: Availability[]) => void;
 }) {
 
-    const today = format(new Date(), "yyyy-MM-dd");
-
-    /* ---------------- ADD ---------------- */
     const addSlot = () => {
         setData([
             ...data,
             {
                 id: crypto.randomUUID(),
-                start_date: today,
-                end_date: today,
-                price: 0,
-                total_slots: 0,
+                start_date: "",
+                end_date: "",
+                price: "",
+                total_slots: "",
                 available_slots: 0,
                 status: "available",
             },
         ]);
     };
-    /* ---------------- UPDATE ---------------- */
+
     const update = (id: string, key: string, value: any) => {
         setData(
-            data.map((item) =>
-                item.id === id ? { ...item, [key]: value } : item
-            )
+            data.map((item) => {
+                if (item.id !== id) return item;
+
+                let updated = { ...item, [key]: value };
+
+                // auto-sync available slots
+                if (key === "total_slots") {
+                    updated.available_slots = Number(value || 0);
+                }
+
+                return updated;
+            })
         );
     };
 
-    /* ---------------- REMOVE ---------------- */
     const remove = (id: string) => {
         setData(data.filter((item) => item.id !== id));
     };
@@ -73,7 +77,6 @@ export default function Step4Availability({
     return (
         <div className="space-y-4">
 
-            {/* HEADER */}
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-lg font-semibold">Availability</h2>
@@ -91,22 +94,17 @@ export default function Step4Availability({
                 </Button>
             </div>
 
-            {/* EMPTY */}
             {data.length === 0 && (
                 <div className="border rounded-xl p-10 text-center text-muted-foreground">
                     No availability slots added yet
                 </div>
             )}
 
-            {/* LIST */}
             {data.map((item, index) => (
                 <Card key={item.id} className="p-5 space-y-5">
 
-                    {/* HEADER */}
                     <div className="flex justify-between items-center">
-                        <p className="font-medium">
-                            Slot {index + 1}
-                        </p>
+                        <p className="font-medium">Slot {index + 1}</p>
 
                         <Button
                             size="icon"
@@ -117,10 +115,8 @@ export default function Step4Availability({
                         </Button>
                     </div>
 
-                    {/* GRID */}
                     <div className="grid grid-cols-2 gap-4">
 
-                        {/* START DATE */}
                         <div className="space-y-1">
                             <Label>Start Date</Label>
                             <DateTimePicker
@@ -129,68 +125,63 @@ export default function Step4Availability({
                                 onChange={(val) =>
                                     update(item.id, "start_date", val)
                                 }
-                                className="w-full"
                             />
                         </div>
 
-                        {/* END DATE */}
                         <div className="space-y-1">
                             <Label>End Date</Label>
                             <DateTimePicker
-                                showTime={false}
                                 value={item.end_date}
+                                showTime={false}
                                 onChange={(val) =>
                                     update(item.id, "end_date", val)
                                 }
-                                className="w-full"
                             />
                         </div>
 
-                        {/* PRICE */}
                         <div className="space-y-1">
-                            <Label>Price (INR)</Label>
+                            <Label>Price</Label>
                             <Input
                                 type="number"
-                                value={item.price}
-                                onChange={(e) =>
-                                    update(item.id, "price", Number(e.target.value))
-                                }
-                            />
-                        </div>
-
-                        {/* TOTAL SLOTS */}
-                        <div className="space-y-1">
-                            <Label>Total Slots</Label>
-                            <Input
-                                type="number"
-                                value={item.total_slots}
+                                value={item.price ?? ""}
                                 onChange={(e) =>
                                     update(
                                         item.id,
-                                        "total_slots",
-                                        Number(e.target.value)
+                                        "price",
+                                        e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
                                     )
                                 }
                             />
                         </div>
 
-                        {/* AVAILABLE SLOTS */}
+                        <div className="space-y-1">
+                            <Label>Total Slots</Label>
+                            <Input
+                                type="number"
+                                value={item.total_slots ?? ""}
+                                onChange={(e) =>
+                                    update(
+                                        item.id,
+                                        "total_slots",
+                                        e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
+                                    )
+                                }
+                            />
+                        </div>
+
                         <div className="space-y-1">
                             <Label>Available Slots</Label>
                             <Input
                                 type="number"
                                 value={item.available_slots}
-                                onChange={(e) =>
-                                    update(
-                                        item.id,
-                                        "available_slots",
-                                        Number(e.target.value)
-                                    )
-                                }
+                                disabled
                             />
                         </div>
 
-                        {/* STATUS */}
                         <div className="space-y-1">
                             <Label>Status</Label>
 
@@ -201,7 +192,7 @@ export default function Step4Availability({
                                 }
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status" />
+                                    <SelectValue />
                                 </SelectTrigger>
 
                                 <SelectContent>

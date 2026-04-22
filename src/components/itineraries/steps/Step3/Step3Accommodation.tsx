@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/select";
 
 type Accommodation = {
-  id: string;
+  id: string; // UI only
   hotel_name: string;
   location: string;
-  nights: number;
+  nights: number | "";
   meal_plan: string;
 };
 
@@ -35,13 +35,13 @@ export default function Step3Accommodation({
         id: crypto.randomUUID(),
         hotel_name: "",
         location: "",
-        nights: 1,
+        nights: "",
         meal_plan: "CP",
       },
     ]);
   };
 
-  const update = (id: string, key: string, value: any) => {
+  const update = (id: string, key: keyof Accommodation, value: any) => {
     setData(
       data.map((item) =>
         item.id === id ? { ...item, [key]: value } : item
@@ -138,17 +138,18 @@ export default function Step3Accommodation({
               </label>
               <Input
                 type="number"
-                min={0}
-                value={item.nights}
+                min={1}
+                value={item.nights ?? ""}
                 onChange={(e) =>
                   update(
                     item.id,
                     "nights",
                     e.target.value === ""
-                      ? 0
+                      ? ""
                       : Number(e.target.value)
                   )
                 }
+                onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
 
@@ -169,10 +170,10 @@ export default function Step3Accommodation({
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="EP">EP</SelectItem>
-                  <SelectItem value="CP">CP</SelectItem>
-                  <SelectItem value="MAP">MAP</SelectItem>
-                  <SelectItem value="AP">AP</SelectItem>
+                  <SelectItem value="EP">EP (Room Only)</SelectItem>
+                  <SelectItem value="CP">CP (Breakfast)</SelectItem>
+                  <SelectItem value="MAP">MAP (Breakfast + Dinner)</SelectItem>
+                  <SelectItem value="AP">AP (All Meals)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

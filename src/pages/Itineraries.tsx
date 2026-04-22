@@ -8,8 +8,16 @@ export default function Itineraries() {
   const [mode, setMode] = useState<"list" | "create" | "edit">("list");
   const [selectedItinerary, setSelectedItinerary] = useState<any>(null);
 
+  // ✅ used to force re-fetch of list
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refreshList = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
   return (
     <div className="space-y-6">
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Itineraries</h1>
@@ -28,9 +36,11 @@ export default function Itineraries() {
         )}
       </div>
 
+      {/* LIST VIEW */}
       {mode === "list" && (
         <ItineraryList
-          onEdit={(item:any) => {
+          key={refreshKey}   // ✅ forces remount → refetch
+          onEdit={(item: any) => {
             setSelectedItinerary(item);
             setMode("edit");
           }}
@@ -38,6 +48,7 @@ export default function Itineraries() {
         />
       )}
 
+      {/* CREATE / EDIT VIEW */}
       {(mode === "create" || mode === "edit") && (
         <ItineraryBuilder
           itineraryData={selectedItinerary}
@@ -45,6 +56,7 @@ export default function Itineraries() {
             setMode("list");
             setSelectedItinerary(null);
           }}
+          onSuccess={refreshList} // ✅ triggers list refresh
         />
       )}
     </div>

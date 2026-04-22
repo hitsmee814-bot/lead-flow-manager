@@ -1,6 +1,5 @@
 "use client";
 
-import { DateTimePicker } from "@/components/custom/DateTimePicker";
 import { RequiredLabel } from "@/components/RequiredLable";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +9,8 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import ImageUploaderMain from "./ImageUploaderMain";
+import { DateTimePicker } from "@/components/custom/DateTimePicker";
 
 type Props = {
     data: any;
@@ -21,6 +21,19 @@ export default function Step1PackageInfo({ data, setData }: Props) {
     const update = (key: string, value: any) => {
         let updated = { ...data, [key]: value };
 
+        if (key === "start_date" && data.end_date && value > data.end_date) {
+            updated.end_date = value;
+        }
+
+        if (key === "end_date" && data.start_date && value < data.start_date) {
+            return; // block invalid selection
+        }
+
+        if (key === "status" && value === "active" && !data.published_at) {
+            updated.published_at = new Date().toISOString();
+        }
+
+        // Auto-set published_at when activating
         if (key === "status" && value === "active" && !data.published_at) {
             updated.published_at = new Date().toISOString();
         }
@@ -30,7 +43,7 @@ export default function Step1PackageInfo({ data, setData }: Props) {
 
     return (
         <div className="space-y-6 pr-4">
-
+            {/* HEADER */}
             <div>
                 <h3 className="text-lg font-semibold">Tour Package Details</h3>
                 <p className="text-sm text-muted-foreground">
@@ -38,89 +51,47 @@ export default function Step1PackageInfo({ data, setData }: Props) {
                 </p>
             </div>
 
+            {/* TITLE */}
             <div>
                 <RequiredLabel>Tour Title</RequiredLabel>
                 <Input
-                    value={data.title}
+                    value={data.title || ""}
                     onChange={(e) => update("title", e.target.value)}
                     placeholder="e.g. Magical Rajasthan Heritage Tour"
                 />
             </div>
 
+            {/* DESCRIPTION */}
             <div>
                 <RequiredLabel>Description</RequiredLabel>
                 <Input
-                    value={data.description}
+                    value={data.description || ""}
                     onChange={(e) => update("description", e.target.value)}
                     placeholder="Describe what makes this tour special..."
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <RequiredLabel>Duration (Days)</RequiredLabel>
-                    <Input
-                        type="number"
-                        value={data.duration_days}
-                        onChange={(e) =>
-                            update("duration_days", Number(e.target.value))
-                        }
-                    />
-                </div>
-
-                <div>
-                    <RequiredLabel>Duration (Nights)</RequiredLabel>
-                    <Input
-                        type="number"
-                        value={data.duration_nights}
-                        onChange={(e) =>
-                            update("duration_nights", Number(e.target.value))
-                        }
-                    />
-                </div>
-            </div>
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium">Active</p>
-                    <p className="text-xs text-muted-foreground">
-                        Toggle visibility of this tour
-                    </p>
-                </div>
-
-                <Switch
-                    checked={data.is_active}
-                    onCheckedChange={(val) => update("is_active", val)}
-                />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="text-sm text-muted-foreground">
-                        Average Rating
-                    </label>
-                    <Input value={data.avg_rating} disabled />
-                </div>
-
-                <div>
-                    <label className="text-sm text-muted-foreground">
-                        Total Reviews
-                    </label>
-                    <Input value={data.total_reviews} disabled />
-                </div>
-            </div>
+            {/* ORIGIN + DESTINATION */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <RequiredLabel>Origin City</RequiredLabel>
                     <Input
-                        value={data.origin_city}
-                        onChange={(e) => update("origin_city", e.target.value)}
+                        value={data.origin_city || ""}
+                        onChange={(e) =>
+                            update("origin_city", e.target.value)
+                        }
+                        placeholder="e.g. Guwahati"
                     />
                 </div>
 
                 <div>
                     <RequiredLabel>Destination</RequiredLabel>
                     <Input
-                        value={data.destination}
-                        onChange={(e) => update("destination", e.target.value)}
+                        value={data.destination || ""}
+                        onChange={(e) =>
+                            update("destination", e.target.value)
+                        }
+                        placeholder="e.g. Arunachal Pradesh"
                     />
                 </div>
             </div>
@@ -150,9 +121,12 @@ export default function Step1PackageInfo({ data, setData }: Props) {
                     <RequiredLabel>Base Price</RequiredLabel>
                     <Input
                         type="number"
-                        value={data.base_price}
+                        value={data.base_price ?? ""}
                         onChange={(e) =>
-                            update("base_price", Number(e.target.value))
+                            update(
+                                "base_price",
+                                e.target.value === "" ? "" : Number(e.target.value)
+                            )
                         }
                     />
                 </div>
@@ -160,29 +134,31 @@ export default function Step1PackageInfo({ data, setData }: Props) {
                 <div>
                     <RequiredLabel>Currency</RequiredLabel>
                     <Select
-                        value={data.currency}
+                        value={data.currency || "INR"}
                         onValueChange={(val) => update("currency", val)}
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Select Currency" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="USD">USD</SelectItem>
                             <SelectItem value="INR">INR</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
             </div>
 
-            {/* META */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <RequiredLabel>Max Guests</RequiredLabel>
                     <Input
                         type="number"
-                        value={data.max_guests}
+                        value={data.max_guests ?? ""}
                         onChange={(e) =>
-                            update("max_guests", Number(e.target.value))
+                            update(
+                                "max_guests",
+                                e.target.value === "" ? "" : Number(e.target.value)
+                            )
                         }
                     />
                 </div>
@@ -190,11 +166,11 @@ export default function Step1PackageInfo({ data, setData }: Props) {
                 <div>
                     <RequiredLabel>Status</RequiredLabel>
                     <Select
-                        value={data.status}
+                        value={data.status || "draft"}
                         onValueChange={(val) => update("status", val)}
                     >
                         <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
@@ -203,6 +179,15 @@ export default function Step1PackageInfo({ data, setData }: Props) {
                         </SelectContent>
                     </Select>
                 </div>
+
+            </div>
+            <div>
+                <RequiredLabel>Tour Images</RequiredLabel>
+
+                <ImageUploaderMain
+                    value={data.images || []}
+                    onChange={(imgs) => update("images", imgs)}
+                />
             </div>
         </div>
     );
