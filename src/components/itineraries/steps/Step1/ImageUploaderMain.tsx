@@ -30,6 +30,16 @@ export default function ImageUploaderMain({
     };
 
     useEffect(() => {
+        return () => {
+            value?.forEach((img) => {
+                if (img.preview?.startsWith("blob:")) {
+                    URL.revokeObjectURL(img.preview);
+                }
+            });
+        };
+    }, []);
+
+    useEffect(() => {
         const fetchDocTypes = async () => {
             try {
                 const res = await fetch(
@@ -87,21 +97,21 @@ export default function ImageUploaderMain({
                 </Button>
             </div>
 
-<input
-    ref={fileRef}
-    type="file"
-    hidden
-    multiple
-    accept="image/png,image/jpeg"
-    onChange={(e) => {
-        const files = Array.from(e.target.files || []);
-        handleFiles(files);
+            <input
+                ref={fileRef}
+                type="file"
+                hidden
+                multiple
+                accept="image/png,image/jpeg"
+                onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    handleFiles(files);
 
-        if (fileRef.current) {
-            fileRef.current.value = "";
-        }
-    }}
-/>
+                    if (fileRef.current) {
+                        fileRef.current.value = "";
+                    }
+                }}
+            />
 
             {/* GRID */}
             {value?.length > 0 && (

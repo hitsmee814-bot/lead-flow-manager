@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Step1PackageInfo from "./steps/Step1/Step1PackageInfo";
 import Step2ItineraryDays from "./steps/Step2/Step2ItineraryDays";
 import Step3Accommodation from "./steps/Step3/Step3Accommodation";
@@ -120,15 +120,22 @@ export default function ItineraryBuilder({
             })),
 
             itinerary_days: (t.itinerary_days ?? []).map((d: any) => ({
-                id: crypto.randomUUID(),
+                id: d.id ? String(d.id) : crypto.randomUUID(),
                 day_number: d.day_number,
-                title: d.title,
-                description: d.description,
-                hotel: "",
-                from: "",
-                to: "",
-                distance: "",
-                travelTime: "",
+                date: d.date ?? "",
+
+                title: d.title ?? "",
+                description: d.description ?? "",
+
+                // ✅ FIXED
+                hotel: d.hotel_name ?? "",
+                distance: d.distance_km ? String(d.distance_km) : "",
+                travelTime: d.travel_time ?? "",
+
+                // optional if you support later
+                from: d.from ?? "",
+                to: d.to ?? "",
+
                 activities: (d.activities ?? []).map((a: any) => ({
                     id: String(a.id),
                     name: a.name,
@@ -137,11 +144,103 @@ export default function ItineraryBuilder({
                     latitude: String(a.latitude),
                     longitude: String(a.longitude),
                 })),
+
                 images: d.images ?? [],
-            })),
+            }))
         };
     });
 
+    useEffect(() => {
+        const loadAllImages = async () => {
+            if (!itineraryData) return;
+
+            // 🔹 TOUR IMAGES
+            const mappedTourImages = await Promise.all(
+                (itineraryData.images || []).map(async (img: any) => {
+                    const preview = img.image_url
+                        ? await getImagePreview(img.image_url)
+                        : null;
+
+                    return {
+                        id: String(img.id),
+                        file: null,
+                        preview,
+                        image_url: img.image_url,
+                        caption: img.caption || "",
+                        is_cover: img.is_cover || false,
+                        document_type: img.document_type || "",
+                    };
+                })
+            );
+
+            // 🔹 ITINERARY DAY IMAGES
+            const mappedDays = await Promise.all(
+                (itineraryData.itinerary_days || []).map(async (day: any) => {
+                    const mappedImages = await Promise.all(
+                        (day.images || []).map(async (img: any) => {
+                            const preview = img.image_url
+                                ? await getImagePreview(img.image_url)
+                                : null;
+
+                            return {
+                                id: String(img.id),
+                                file: null,
+                                preview,
+                                image_url: img.image_url,
+                                caption: img.caption || "",
+                                document_type: img.document_type || "",
+                            };
+                        })
+                    );
+
+                    return {
+                        ...day,
+                        images: mappedImages,
+                    };
+                })
+            );
+
+            setFormData((prev: any) => ({
+                ...prev,
+                tour: {
+                    ...prev.tour,
+                    images: mappedTourImages,
+                },
+                itinerary_days: mappedDays,
+            }));
+        };
+
+        loadAllImages();
+    }, [itineraryData]);
+
+    useEffect(() => {
+        return () => {
+            formData.tour.images?.forEach((img: any) => {
+                if (img.preview) URL.revokeObjectURL(img.preview);
+            });
+
+            formData.itinerary_days?.forEach((d: any) => {
+                d.images?.forEach((img: any) => {
+                    if (img.preview) URL.revokeObjectURL(img.preview);
+                });
+            });
+        };
+    }, []);
+    const getImagePreview = async (filename: string) => {
+        try {
+            const res = await fetch(
+                `http://150.241.244.100:8000/files/download?filename=${encodeURIComponent(filename)}`
+            );
+
+            if (!res.ok) throw new Error("Failed to fetch image");
+
+            const blob = await res.blob();
+            return URL.createObjectURL(blob);
+        } catch (err) {
+            console.error("Image preview failed:", err);
+            return null;
+        }
+    };
     const totalSteps = steps.length;
     const validateStep1 = () => {
         const t = formData.tour;
@@ -215,7 +314,7 @@ export default function ItineraryBuilder({
                 if (a.longitude === "" || a.longitude == null || isNaN(Number(a.longitude)))
                     return `Day ${i + 1}, Activity ${j + 1}: valid longitude required`;
             }
-            
+
             // images + caption validation
             if (d.images?.length) {
                 const invalidImage = d.images.find(
@@ -301,87 +400,272 @@ export default function ItineraryBuilder({
         return null;
     };
 
+    // const submitItinerary = async () => {
+    //     try {
+    //         toast({ title: "Creating itinerary..." });
+
+    //         // 🔹 STEP 1: CREATE (no images)
+    //         const createPayload: any = {
+    //             tour: {
+    //                 title: formData.tour.title,
+    //                 description: formData.tour.description,
+    //                 duration_days: formData.tour.duration_days,
+    //                 duration_nights: formData.tour.duration_nights,
+    //                 start_date: formData.tour.start_date,
+    //                 end_date: formData.tour.end_date,
+    //                 origin_city: formData.tour.origin_city,
+    //                 destination: formData.tour.destination,
+    //                 base_price: Number(formData.tour.base_price),
+    //                 currency: formData.tour.currency,
+    //                 max_guests: Number(formData.tour.max_guests),
+    //             },
+
+    //             itinerary_days: formData.itinerary_days.map((d: any) => ({
+    //                 date: d.date,
+    //                 day_number: Number(d.day_number),
+    //                 title: d.title,
+    //                 description: d.description,
+    //                 hotel_name: d.hotel,
+    //                 distance_km: d.distance ? Number(d.distance) : 0,
+    //                 travel_time: d.travelTime || "",
+    //                 activities: [],
+    //                 images: [],
+    //             })),
+    //         };
+
+    //         if (formData.availability?.length > 0) {
+    //             createPayload.availability = formData.availability;
+    //         }
+
+    //         if (formData.cancellation_policy?.length > 0) {
+    //             createPayload.cancellation_policy = formData.cancellation_policy;
+    //         }
+
+    //         if (formData.accommodations?.length > 0) {
+    //             createPayload.accommodations = formData.accommodations;
+    //         }
+
+    //         // if (formData.tour.images?.length > 0) {
+    //         //     createPayload.images = formData.images;
+    //         // }
+
+    //         console.log("📤 CREATE payload:", createPayload);
+
+    //         const createRes = await fetch(
+    //             "http://150.241.244.100:8000/itinerary/create",
+    //             {
+    //                 method: "POST",
+    //                 headers: { "Content-Type": "application/json" },
+    //                 body: JSON.stringify(createPayload),
+    //             }
+    //         );
+
+    //         const createData = await createRes.json();
+
+    //         if (!createRes.ok) {
+    //             throw new Error(createData?.message || "Create failed");
+    //         }
+
+    //         const tourId = createData.tour_id;
+    //         console.log("✅ Created tour:", tourId);
+
+    //         toast({ title: "Uploading images..." });
+
+    //         // 🔹 STEP 2: UPLOAD IMAGES
+    //         const { uploadedTourImages, uploadedDayImages } =
+    //             await uploadAllImages(tourId);
+
+    //         console.log("📦 Uploaded images:", {
+    //             uploadedTourImages,
+    //             uploadedDayImages,
+    //         });
+
+    //         // 🔹 STEP 3: UPDATE with images
+    //         const updatePayload = {
+    //             tour: {
+    //                 title: formData.tour.title,
+    //                 description: formData.tour.description,
+    //                 duration_days: formData.tour.duration_days,
+    //                 duration_nights: formData.tour.duration_nights,
+    //                 start_date: formData.tour.start_date,
+    //                 end_date: formData.tour.end_date,
+    //                 origin_city: formData.tour.origin_city,
+    //                 destination: formData.tour.destination,
+    //                 base_price: Number(formData.tour.base_price),
+    //                 currency: formData.tour.currency,
+    //                 max_guests: Number(formData.tour.max_guests),
+    //             },
+
+    //             images: uploadedTourImages.map((img: any) => ({
+    //                 image_url: img.image_url || img.url,   // 🔥 IMPORTANT
+    //                 caption: img.caption,
+    //                 document_type: img.document_type,
+    //                 is_cover: img.is_cover || false,
+    //             })),
+
+    //             itinerary_days: formData.itinerary_days.map((d: any) => {
+    //                 const found = uploadedDayImages.find(
+    //                     (x) => x.day_number === d.day_number
+    //                 );
+
+    //                 return {
+    //                     date: d.date,
+    //                     day_number: d.day_number,
+    //                     title: d.title,
+    //                     description: d.description,
+    //                     hotel_name: d.hotel || "",
+    //                     distance_km: d.distance ? Number(d.distance) : 0,
+    //                     travel_time: d.travelTime || "",
+
+    //                     activities: (d.activities || []).map((a: any) => ({
+    //                         name: a.name,
+    //                         type: a.type,
+    //                         description: a.description,
+    //                         latitude: Number(a.latitude),
+    //                         longitude: Number(a.longitude),
+    //                     })),
+
+    //                     images: (found?.images || []).map((img: any) => ({
+    //                         image_url: img.image_url || img.url,   // 🔥 scan-upload result
+    //                         caption: img.caption,
+    //                         document_type: img.document_type,
+    //                         is_cover: img.is_cover || false,
+    //                     })),
+    //                 };
+    //             }),
+
+    //             availability: formData.availability || [],
+    //             cancellation_policy: formData.cancellation_policy || [],
+    //             accommodations: formData.accommodations || [],
+    //         };
+
+    //         console.log("📤 UPDATE payload:", updatePayload);
+
+    //         const updateRes = await fetch(
+    //             `http://150.241.244.100:8000/itinerary/update/${tourId}`,
+    //             {
+    //                 method: "POST",
+    //                 headers: { "Content-Type": "application/json" },
+    //                 body: JSON.stringify(updatePayload),
+    //             }
+    //         );
+
+    //         const updateData = await updateRes.json();
+
+    //         if (!updateRes.ok) {
+    //             throw new Error(updateData?.message || "Update failed");
+    //         }
+
+    //         console.log("✅ FINAL SUCCESS");
+
+    //         toast({
+    //             title: "Itinerary created 🎉",
+    //             description: "All images uploaded successfully",
+    //             className: "border-green-500 bg-green-50 text-green-900",
+    //         });
+    //         onSuccess?.();
+    //         onCancel();
+
+    //     } catch (err: any) {
+    //         console.error("❌ FLOW FAILED:", err);
+
+    //         toast({
+    //             title: "Process failed",
+    //             description: err.message || "Something went wrong",
+    //             className: "border-red-500 bg-red-50 text-red-900",
+    //         });
+    //     }
+    // };
     const submitItinerary = async () => {
         try {
-            toast({ title: "Creating itinerary..." });
+            const isEditMode = !!formData.tour.id;
+            const tourId = formData.tour.id;
 
-            // 🔹 STEP 1: CREATE (no images)
-            const createPayload: any = {
-                tour: {
-                    title: formData.tour.title,
-                    description: formData.tour.description,
-                    duration_days: formData.tour.duration_days,
-                    duration_nights: formData.tour.duration_nights,
-                    start_date: formData.tour.start_date,
-                    end_date: formData.tour.end_date,
-                    origin_city: formData.tour.origin_city,
-                    destination: formData.tour.destination,
-                    base_price: Number(formData.tour.base_price),
-                    currency: formData.tour.currency,
-                    max_guests: Number(formData.tour.max_guests),
-                },
+            let finalTourId = tourId;
 
-                itinerary_days: formData.itinerary_days.map((d: any) => ({
-                    date: d.date,
-                    day_number: Number(d.day_number),
-                    title: d.title,
-                    description: d.description,
-                    hotel_name: d.hotel,
-                    distance_km: d.distance ? Number(d.distance) : 0,
-                    travel_time: d.travelTime || "",
-                    activities: [],
-                    images: [],
-                })),
-            };
+            // =========================
+            // 🆕 CREATE FLOW
+            // =========================
+            if (!isEditMode) {
+                toast({ title: "Creating itinerary..." });
 
-            if (formData.availability?.length > 0) {
-                createPayload.availability = formData.availability;
-            }
+                const createPayload: any = {
+                    tour: {
+                        title: formData.tour.title,
+                        description: formData.tour.description,
+                        duration_days: formData.tour.duration_days,
+                        duration_nights: formData.tour.duration_nights,
+                        start_date: formData.tour.start_date,
+                        end_date: formData.tour.end_date,
+                        origin_city: formData.tour.origin_city,
+                        destination: formData.tour.destination,
+                        base_price: Number(formData.tour.base_price),
+                        currency: formData.tour.currency,
+                        max_guests: Number(formData.tour.max_guests),
+                    },
+                    itinerary_days: formData.itinerary_days.map((d: any) => ({
+                        date: d.date,
+                        day_number: Number(d.day_number),
+                        title: d.title,
+                        description: d.description,
+                        hotel_name: d.hotel,
+                        distance_km: d.distance ? Number(d.distance) : 0,
+                        travel_time: d.travelTime || "",
+                        activities: [],
+                        images: [],
+                    })),
+                    availability: formData.availability || [],
+                    cancellation_policy: formData.cancellation_policy || [],
+                    accommodations: formData.accommodations || [],
+                };
 
-            if (formData.cancellation_policy?.length > 0) {
-                createPayload.cancellation_policy = formData.cancellation_policy;
-            }
+                const res = await fetch(
+                    "http://150.241.244.100:8000/itinerary/create",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(createPayload),
+                    }
+                );
 
-            if (formData.accommodations?.length > 0) {
-                createPayload.accommodations = formData.accommodations;
-            }
+                const data = await res.json();
 
-            // if (formData.tour.images?.length > 0) {
-            //     createPayload.images = formData.images;
-            // }
-
-            console.log("📤 CREATE payload:", createPayload);
-
-            const createRes = await fetch(
-                "http://150.241.244.100:8000/itinerary/create",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(createPayload),
+                if (!res.ok) {
+                    throw new Error(data?.message || "Create failed");
                 }
-            );
 
-            const createData = await createRes.json();
-
-            if (!createRes.ok) {
-                throw new Error(createData?.message || "Create failed");
+                finalTourId = data.tour_id;
             }
 
-            const tourId = createData.tour_id;
-            console.log("✅ Created tour:", tourId);
-
+            // =========================
+            // 📤 IMAGE UPLOAD (both modes)
+            // =========================
             toast({ title: "Uploading images..." });
 
-            // 🔹 STEP 2: UPLOAD IMAGES
             const { uploadedTourImages, uploadedDayImages } =
-                await uploadAllImages(tourId);
+                await uploadAllImages(finalTourId);
 
-            console.log("📦 Uploaded images:", {
-                uploadedTourImages,
-                uploadedDayImages,
-            });
+            const existingTourImages = (formData.tour.images || [])
+                .filter((img: any) => !img.file)
+                .map((img: any) => ({
+                    image_url: img.image_url,
+                    caption: img.caption,
+                    document_type: img.document_type,
+                    is_cover: img.is_cover || false,
+                }));
 
-            // 🔹 STEP 3: UPDATE with images
+            const newTourImages = uploadedTourImages.map((img: any) => ({
+                image_url: img.image_url,
+                caption: img.caption,
+                document_type: img.document_type,
+                is_cover: img.is_cover || false,
+            }));
+
+            const mergedTourImages = [...existingTourImages, ...newTourImages];
+
+            // =========================
+            // 🔁 UPDATE (both modes)
+            // =========================
             const updatePayload = {
                 tour: {
                     title: formData.tour.title,
@@ -397,17 +681,30 @@ export default function ItineraryBuilder({
                     max_guests: Number(formData.tour.max_guests),
                 },
 
-                images: uploadedTourImages.map((img: any) => ({
-                    image_url: img.image_url || img.url,   // 🔥 IMPORTANT
-                    caption: img.caption,
-                    document_type: img.document_type,
-                    is_cover: img.is_cover || false,
-                })),
+                images: mergedTourImages,
 
                 itinerary_days: formData.itinerary_days.map((d: any) => {
                     const found = uploadedDayImages.find(
                         (x) => x.day_number === d.day_number
                     );
+
+                    // ✅ EXISTING (already uploaded images)
+                    const existingImages = (d.images || [])
+                        .filter((img: any) => !img.file)
+                        .map((img: any) => ({
+                            image_url: img.image_url,
+                            caption: img.caption,
+                            document_type: img.document_type,
+                            is_cover: img.is_cover || false,
+                        }));
+
+                    // ✅ NEW (just uploaded now)
+                    const newImages = (found?.images || []).map((img: any) => ({
+                        image_url: img.image_url,
+                        caption: img.caption,
+                        document_type: img.document_type,
+                        is_cover: img.is_cover || false,
+                    }));
 
                     return {
                         date: d.date,
@@ -426,12 +723,7 @@ export default function ItineraryBuilder({
                             longitude: Number(a.longitude),
                         })),
 
-                        images: (found?.images || []).map((img: any) => ({
-                            image_url: img.image_url || img.url,   // 🔥 scan-upload result
-                            caption: img.caption,
-                            document_type: img.document_type,
-                            is_cover: img.is_cover || false,
-                        })),
+                        images: [...existingImages, ...newImages],
                     };
                 }),
 
@@ -440,10 +732,8 @@ export default function ItineraryBuilder({
                 accommodations: formData.accommodations || [],
             };
 
-            console.log("📤 UPDATE payload:", updatePayload);
-
             const updateRes = await fetch(
-                `http://150.241.244.100:8000/itinerary/update/${tourId}`,
+                `http://150.241.244.100:8000/itinerary/update/${finalTourId}`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -457,16 +747,13 @@ export default function ItineraryBuilder({
                 throw new Error(updateData?.message || "Update failed");
             }
 
-            console.log("✅ FINAL SUCCESS");
-
             toast({
-                title: "Itinerary created 🎉",
-                description: "All images uploaded successfully",
+                title: isEditMode ? "Itinerary updated ✅" : "Itinerary created 🎉",
                 className: "border-green-500 bg-green-50 text-green-900",
             });
+
             onSuccess?.();
             onCancel();
-
         } catch (err: any) {
             console.error("❌ FLOW FAILED:", err);
 
@@ -477,7 +764,6 @@ export default function ItineraryBuilder({
             });
         }
     };
-
     const uploadImage = async (file: File, tourId: number, document_type: string) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -498,7 +784,7 @@ export default function ItineraryBuilder({
             throw new Error("Image upload failed");
         }
 
-        return data.file_path; // ✅ IMPORTANT
+        return data.object_name; // ✅ IMPORTANT
     };
 
     const uploadAllImages = async (tourId: number) => {

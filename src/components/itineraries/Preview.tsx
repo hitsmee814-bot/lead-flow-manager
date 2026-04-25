@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import useEmblaCarousel from "embla-carousel-react";
+import { useEffect, useState } from "react";
 
 /* ================= MAIN ================= */
 
@@ -23,6 +24,77 @@ export default function TourPreview({
     onClose: () => void;
     data: any;
 }) {
+
+    const [resolvedImages, setResolvedImages] = useState<any[]>([]);
+    const [resolvedDays, setResolvedDays] = useState<any[]>([]);
+
+    const resolveImage = async (img: any) => {
+        // already local upload
+        if (img.preview?.startsWith("blob:")) return img;
+
+        // already resolved
+        if (img.preview) return img;
+
+        // no key
+        if (!img.image_url) return img;
+
+        try {
+            const res = await fetch(
+                `http://150.241.244.100:8000/files/download?filename=${encodeURIComponent(img.image_url)}`
+            );
+
+            const blob = await res.blob();
+            const preview = URL.createObjectURL(blob);
+
+            return { ...img, preview };
+        } catch (err) {
+            console.error("Image download failed", err);
+            return img;
+        }
+    };
+
+    useEffect(() => {
+        const load = async () => {
+            // TOUR LEVEL IMAGES
+            const imgs = await Promise.all(
+                (data?.images || []).map(resolveImage)
+            );
+            setResolvedImages(imgs);
+
+            // ITINERARY IMAGES
+            const days = await Promise.all(
+                (data?.itinerary_days || []).map(async (day: any) => {
+                    const imgs = await Promise.all(
+                        (day.images || []).map(resolveImage)
+                    );
+
+                    return { ...day, images: imgs };
+                })
+            );
+
+            setResolvedDays(days);
+        };
+
+        if (open) load(); // only run when modal opens
+    }, [data, open]);
+
+    useEffect(() => {
+        return () => {
+            resolvedImages.forEach((img) => {
+                if (img.preview?.startsWith("blob:")) {
+                    URL.revokeObjectURL(img.preview);
+                }
+            });
+
+            resolvedDays.forEach((day) => {
+                day.images?.forEach((img: any) => {
+                    if (img.preview?.startsWith("blob:")) {
+                        URL.revokeObjectURL(img.preview);
+                    }
+                });
+            });
+        };
+    }, [resolvedImages, resolvedDays]);
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-6xl h-[92vh] p-0 overflow-hidden">
@@ -59,8 +131,7 @@ export default function TourPreview({
                         {/* ================= GALLERY ================= */}
                         <Section title="Gallery">
                             {data?.images?.length ? (
-                                <ImageCarousel images={data.images} />
-                            ) : (
+                                <ImageCarousel images={resolvedImages} />) : (
                                 <Empty text="No images uploaded yet" />
                             )}
                         </Section>
@@ -103,7 +174,7 @@ export default function TourPreview({
                         <Section title="Day-wise Itinerary">
                             {data?.itinerary_days?.length ? (
                                 <div className="space-y-5">
-                                    {data.itinerary_days.map((day: any, i: number) => (
+                                    {resolvedDays.map((day: any, i: number) => (
                                         <Card key={day.id} className="p-5 border-l-4 border-[#00AFEF]">
 
                                             <div className="flex justify-between">
@@ -150,7 +221,7 @@ export default function TourPreview({
                                                     {day.images.map((img: any, idx: number) => (
                                                         <img
                                                             key={idx}
-                                                            src={img.image_url}
+                                                            src={img?.preview}
                                                             className="h-24 w-32 object-cover rounded-md border"
                                                         />
                                                     ))}
@@ -250,7 +321,7 @@ function ImageCarousel({ images }: { images: any[] }) {
                 {images.map((img: any, i: number) => (
                     <div key={i} className="min-w-full h-[320px]">
                         <img
-                            src={img?.image_url}
+                            src={img.preview}
                             className="w-full h-full object-cover"
                         />
                     </div>

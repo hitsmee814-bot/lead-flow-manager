@@ -10,6 +10,8 @@ import {
     Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 } from "@/components/ui/tooltip";
 import { Search, ArrowUpDown } from "lucide-react";
+import { Switch } from "../ui/switch";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
     onEdit: (id: string) => void;
@@ -25,9 +27,13 @@ type Itinerary = {
     duration: string;
     price: number;
     status: string;
+    is_active: boolean;
+
 };
 
 export default function ItineraryList({ onEdit, onPreview }: Props) {
+    const { toast } = useToast();
+
     const [data, setData] = useState<Itinerary[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -57,10 +63,11 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                 const json = await res.json();
 
                 const parsed = json.map((item: string) => JSON.parse(item));
-
+                console.log(parsed)
                 const mapped = parsed.map((item: any) => ({
                     id: item.tour.id,
                     title: item.tour.title,
+                    is_active: item.tour.is_active ?? true,
                     duration: `${item.tour.duration_days}D / ${item.tour.duration_nights}N`,
                     price: item.tour.base_price,
                     status: item.tour.status ?? "active",
@@ -112,6 +119,61 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
         (page - 1) * PAGE_SIZE,
         page * PAGE_SIZE
     );
+
+    const toggleActive = async (id: string, value: boolean) => {
+        const status = value ? "active" : "inactive";
+
+        try {
+            // optimistic update
+            setData(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? { ...item, is_active: value, status }
+                        : item
+                )
+            );
+
+            await fetch(
+                `http://150.241.244.100:8000/itinerary/update-status/${id}`,
+                {
+                    method: "POST", // IMPORTANT: your API uses POST
+                    headers: {
+                        "Content-Type": "application/json",
+                        accept: "application/json",
+                    },
+                    body: JSON.stringify({
+                        status,
+                        is_active: value,
+                    }),
+                }
+            );
+
+            toast({
+                title: "Itinerary created 🎉",
+                description: "All images uploaded successfully",
+                className: "border-green-500 bg-green-50 text-green-900",
+            });
+        } catch (err) {
+            console.error(err);
+            toast({
+                title: "Process failed",
+                description: err.message || "Something went wrong",
+                className: "border-red-500 bg-red-50 text-red-900",
+            });
+
+            setData(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            is_active: !value,
+                            status: !value ? "active" : "inactive",
+                        }
+                        : item
+                )
+            );
+        }
+    };
     console.log(paginated)
 
     return (
@@ -154,6 +216,7 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                                         </Button>
                                     </TableHead>
 
+
                                     <TableHead>
                                         <Button variant="ghost" size="sm" onClick={() => handleSort("duration")}>
                                             Duration <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -171,6 +234,7 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                                             Status <ArrowUpDown className="ml-2 h-4 w-4" />
                                         </Button>
                                     </TableHead>
+                                    <TableHead>Active</TableHead>
 
                                     <TableHead className="text-right">Actions</TableHead>
 
@@ -178,7 +242,7 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                             </TableHeader>
 
                             <TableBody>
-                                {paginated.map((item:any) => (
+                                {paginated.map((item: any) => (
                                     <TableRow key={item.id} className="hover:bg-muted/50">
 
                                         {[item.title, item.duration, `₹ ${item.price}`, item.status].map((value, i) => (
@@ -196,6 +260,13 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                                                 </Tooltip>
                                             </TableCell>
                                         ))}
+
+                                        <TableCell>
+                                            <Switch
+                                                checked={item.is_active}
+                                                onCheckedChange={(val) => toggleActive(item.id, val)}
+                                            />
+                                        </TableCell>
 
                                         <TableCell className="text-right space-x-2">
 
