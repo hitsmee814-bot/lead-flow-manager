@@ -1,64 +1,62 @@
 "use client";
 
+import { AppHeader } from "@/components/common/AppHeader";
 import ItineraryBuilder from "@/components/itineraries/ItineraryBuilder";
 import ItineraryList from "@/components/itineraries/ItineraryList";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { useState } from "react";
-
 export default function Itineraries() {
   const [mode, setMode] = useState<"list" | "create" | "edit">("list");
   const [selectedItinerary, setSelectedItinerary] = useState<any>(null);
-
-  // ✅ used to force re-fetch of list
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const refreshList = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
+  const refreshList = () => setRefreshKey((p) => p + 1);
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Itineraries</h1>
-          <p className="text-sm text-gray-500">
-            Manage and create tour packages
-          </p>
-        </div>
 
+      {/* ✅ SAME HEADER */}
+      <AppHeader
+        title="Bonhomiee"
+        subtitle="Itinerary Management"
+        rightActions={
+          mode === "list" && (
+            <Button
+              onClick={() => setMode("create")}
+              className="bg-[#00AFEF] text-white flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Itinerary
+            </Button>
+          )
+        }
+      />
+
+      {/* BODY */}
+      <div className="px-6">
         {mode === "list" && (
-          <button
-            onClick={() => setMode("create")}
-            className="px-4 py-2 bg-[#00AFEF] text-white rounded-md"
-          >
-            + Create Itinerary
-          </button>
+          <ItineraryList
+            key={refreshKey}
+            onEdit={(item: any) => {
+              setSelectedItinerary(item);
+              setMode("edit");
+            }}
+            onPreview={(item) => console.log(item)}
+          />
+        )}
+
+        {(mode === "create" || mode === "edit") && (
+          <ItineraryBuilder
+            itineraryData={selectedItinerary}
+            onCancel={() => {
+              setMode("list");
+              setSelectedItinerary(null);
+            }}
+            onSuccess={refreshList}
+          />
         )}
       </div>
-
-      {/* LIST VIEW */}
-      {mode === "list" && (
-        <ItineraryList
-          key={refreshKey}   // ✅ forces remount → refetch
-          onEdit={(item: any) => {
-            setSelectedItinerary(item);
-            setMode("edit");
-          }}
-          onPreview={(item) => console.log(item)}
-        />
-      )}
-
-      {/* CREATE / EDIT VIEW */}
-      {(mode === "create" || mode === "edit") && (
-        <ItineraryBuilder
-          itineraryData={selectedItinerary}
-          onCancel={() => {
-            setMode("list");
-            setSelectedItinerary(null);
-          }}
-          onSuccess={refreshList} // ✅ triggers list refresh
-        />
-      )}
     </div>
   );
 }

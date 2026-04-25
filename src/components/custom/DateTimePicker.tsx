@@ -1,259 +1,216 @@
 "use client";
 
 import { useState } from "react";
-import {
-  format,
-  isBefore,
-  isAfter,
-  startOfDay,
-  endOfDay,
-} from "date-fns";
+import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 
 import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
 } from "@/components/ui/select";
 
-import { Clock, CalendarIcon } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MONTHS = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
 export function DateTimePicker({
-  value,
-  onChange,
-  className,
-  min,
-  max,
-  showTime = true,
-}: {
-  value: any;
-  onChange: any;
-  className?: string;
-  min?: string | Date;
-  max?: string | Date;
-  showTime?: boolean;
-}) {
-  const parsedValue = value ? new Date(value) : null;
-  const minDate = min ? new Date(min) : null;
-  const maxDate = max ? new Date(max) : null;
+    value,
+    onChange,
+    className,
+    min,
+    max,
+    showTime = true,
+}: any) {
+    const [open, setOpen] = useState(false);
 
-  const [open, setOpen] = useState(false);
-  const [tempDate, setTempDate] = useState<Date | null>(parsedValue);
+    const parsed = value ? new Date(value) : null;
+    const today = new Date();
 
-  const displayDate = parsedValue;
+    // ✅ IMPORTANT: single source of truth for calendar navigation
+    const [month, setMonth] = useState<Date>(
+        parsed ?? new Date(today.getFullYear(), today.getMonth(), 1)
+    );
 
-  // Generate year range (adjust if needed)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 50 }, (_, i) => currentYear - 25 + i);
+    const minDate = min ? new Date(min) : null;
+    const maxDate = max ? new Date(max) : null;
 
-  const isDateDisabled = (day: Date) => {
-    if (minDate && isBefore(day, startOfDay(minDate))) return true;
-    if (maxDate && isAfter(day, endOfDay(maxDate))) return true;
-    return false;
-  };
+    const years = Array.from(
+        { length: 30 },
+        (_, i) => today.getFullYear() - 15 + i
+    );
 
-  const handleConfirm = () => {
-    if (!tempDate) return;
+    const isDisabled = (d: Date) => {
+        if (minDate && isBefore(d, startOfDay(minDate))) return true;
+        if (maxDate && isAfter(d, endOfDay(maxDate))) return true;
+        return false;
+    };
 
-    if (minDate && tempDate < minDate) return;
-    if (maxDate && tempDate > maxDate) return;
+    const commit = (d: Date) => {
+        if (minDate && d < minDate) return;
+        if (maxDate && d > maxDate) return;
 
-    if (showTime) {
-      onChange(tempDate.toISOString());
-    } else {
-      const d = new Date(tempDate);
-      d.setHours(0, 0, 0, 0);
-      onChange(format(d, "yyyy-MM-dd"));
-    }
+        if (showTime) onChange(d.toISOString());
+        else {
+            const clean = new Date(d);
+            clean.setHours(0, 0, 0, 0);
+            onChange(format(clean, "yyyy-MM-dd"));
+        }
+    };
 
-    setOpen(false);
-  };
+    const handleSelectDate = (d: Date | undefined) => {
+        if (!d) return;
 
-  const handleClear = () => {
-    setTempDate(null);
-    onChange(null);
-  };
+        const base = parsed ? new Date(parsed) : new Date();
+        base.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!tempDate) return;
+        commit(base);
+        setOpen(false);
+    };
 
-    const [h, m] = e.target.value.split(":").map(Number);
-    const updated = new Date(tempDate);
-    updated.setHours(h, m);
+    const handleMonthYearNav = (newMonth: Date) => {
+        setMonth(newMonth); // 🔥 THIS fixes prev/next arrows
+    };
 
-    if (minDate && updated < minDate) return;
-    if (maxDate && updated > maxDate) return;
+    const handleMonthChange = (m: number) => {
+        const updated = new Date(month);
+        updated.setMonth(m);
+        setMonth(updated);
+    };
 
-    setTempDate(updated);
-  };
+    const handleYearChange = (y: number) => {
+        const updated = new Date(month);
+        updated.setFullYear(y);
+        setMonth(updated);
+    };
 
-  const handleMonthChange = (monthIndex: number) => {
-    if (!tempDate) return;
+    const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!parsed) return;
 
-    const updated = new Date(tempDate);
-    updated.setMonth(monthIndex);
-    setTempDate(updated);
-  };
+        const [h, m] = e.target.value.split(":").map(Number);
+        const updated = new Date(parsed);
+        updated.setHours(h, m);
 
-  const handleYearChange = (year: number) => {
-    if (!tempDate) return;
+        commit(updated);
+    };
 
-    const updated = new Date(tempDate);
-    updated.setFullYear(year);
-    setTempDate(updated);
-  };
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <div className="relative w-full">
+                    <CalendarIcon className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div className="relative w-full">
-          <CalendarIcon className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                    <Input
+                        readOnly
+                        className={cn("pl-8 cursor-pointer h-9 text-sm", className)}
+                        value={
+                            parsed
+                                ? showTime
+                                    ? format(parsed, "PP • HH:mm")
+                                    : format(parsed, "PP")
+                                : ""
+                        }
+                        placeholder="Select date"
+                    />
+                </div>
+            </PopoverTrigger>
 
-          <Input
-            readOnly
-            className={cn("pl-9 cursor-pointer", className)}
-            value={
-              displayDate
-                ? showTime
-                  ? format(displayDate, "PPP • HH:mm")
-                  : format(displayDate, "PPP")
-                : ""
-            }
-            placeholder={showTime ? "Pick date & time" : "Pick date"}
-          />
-        </div>
-      </PopoverTrigger>
+            <PopoverContent className="w-72 p-3 space-y-3">
 
-      <PopoverContent className="p-4 w-80 space-y-4" align="start">
-        {/* 🔥 Month + Year Selectors */}
-        <div className="flex gap-2">
-          <Select
-            value={
-              tempDate ? String(tempDate.getMonth()) : undefined
-            }
-            onValueChange={(val) => handleMonthChange(Number(val))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Month" />
-            </SelectTrigger>
-            <SelectContent>
-              {MONTHS.map((m, i) => (
-                <SelectItem key={i} value={String(i)}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                {/* Month / Year */}
+                <div className="flex gap-2">
+                    <Select
+                        value={String(month.getMonth())}
+                        onValueChange={(v) => handleMonthChange(Number(v))}
+                    >
+                        <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Mon" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {MONTHS.map((m, i) => (
+                                <SelectItem key={i} value={String(i)}>
+                                    {m}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
-          <Select
-            value={
-              tempDate ? String(tempDate.getFullYear()) : undefined
-            }
-            onValueChange={(val) => handleYearChange(Number(val))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60 overflow-y-auto">
-              {years.map((y) => (
-                <SelectItem key={y} value={String(y)}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                    <Select
+                        value={String(month.getFullYear())}
+                        onValueChange={(v) => handleYearChange(Number(v))}
+                    >
+                        <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                            {years.map((y) => (
+                                <SelectItem key={y} value={String(y)}>
+                                    {y}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
-        {/* 📅 Calendar */}
-        <Calendar
-          mode="single"
-          selected={tempDate ?? undefined}
-          onSelect={(d) => {
-            if (!d || isDateDisabled(d)) return;
+                <div className="h-[320px]">
+                    <Calendar
+                        mode="single"
+                        selected={parsed ?? undefined}
+                        onSelect={handleSelectDate}
+                        disabled={isDisabled}
+                        month={month}
+                        onMonthChange={handleMonthYearNav}
+                        classNames={{
+                            day_today: "bg-transparent text-inherit",
+                            today: "bg-transparent text-inherit",
+                        }}
+                    />
+                </div>
 
-            const updated = tempDate ? new Date(tempDate) : new Date();
-            updated.setFullYear(
-              d.getFullYear(),
-              d.getMonth(),
-              d.getDate()
-            );
+                {/* Time */}
+                {showTime && (
+                    <div className="relative">
+                        <Input
+                            type="time"
+                            className="h-9 text-sm pr-8"
+                            value={
+                                parsed
+                                    ? `${String(parsed.getHours()).padStart(2, "0")}:${String(
+                                        parsed.getMinutes()
+                                    ).padStart(2, "0")}`
+                                    : ""
+                            }
+                            onChange={handleTimeChange}
+                        />
+                        <Clock className="absolute right-2 top-2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                )}
 
-            setTempDate(updated);
-          }}
-          month={tempDate ?? new Date()}
-          onMonthChange={(m) => {
-            if (!tempDate) {
-              setTempDate(m);
-            } else {
-              const updated = new Date(tempDate);
-              updated.setMonth(m.getMonth());
-              updated.setFullYear(m.getFullYear());
-              setTempDate(updated);
-            }
-          }}
-          disabled={isDateDisabled}
-          classNames={{
-            day_today: "bg-transparent text-foreground",
-          }}
-        />
-
-        {/* ⏰ Time */}
-        {showTime && (
-          <div className="relative w-full">
-            <Input
-              type="time"
-              className="w-full pr-10"
-              value={
-                tempDate
-                  ? `${String(tempDate.getHours()).padStart(2, "0")}:${String(
-                      tempDate.getMinutes()
-                    ).padStart(2, "0")}`
-                  : ""
-              }
-              onChange={handleTimeChange}
-            />
-            <Clock className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 pointer-events-none" />
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-red-500 text-red-600 hover:bg-red-50"
-            onClick={handleClear}
-          >
-            Clear
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-blue-600 text-blue-600 hover:bg-blue-50"
-            disabled={!tempDate}
-            onClick={handleConfirm}
-          >
-            OK
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+                {/* Clear */}
+                <div className="flex justify-end">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        onClick={() => onChange(null)}
+                    >
+                        Clear
+                    </Button>
+                </div>
+            </PopoverContent>
+        </Popover>
+    );
 }
