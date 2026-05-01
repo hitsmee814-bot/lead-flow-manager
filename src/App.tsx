@@ -129,7 +129,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
 
-      <BrowserRouter basename="/cms/bonhomiee">
+      <BrowserRouter basename="/lead-flow-manager">
         <SessionHandler>
           <Routes>
             <Route index element={<Navigate to="/dashboard" replace />} />
