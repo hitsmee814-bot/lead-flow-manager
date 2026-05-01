@@ -5,9 +5,6 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
     base: "/lead-flow-manager/",
-    build: {
-        outDir: "docs", // 👈 IMPORTANT
-    },
     //   server: {
     //     host: "::",
     //     port: 3000,
