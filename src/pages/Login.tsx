@@ -55,7 +55,7 @@ const Login = () => {
       const basicAuth = btoa(`${username}:${password}`);
 
       const res = await fetch(
-        "http://150.241.244.100:51800/api/login",
+        "https://ascendus.bonhomiee.com/api/login",
         {
           method: "GET",
           headers: {
