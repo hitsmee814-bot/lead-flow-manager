@@ -28,6 +28,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { deleteSessionCookie } from "@/util/authCookies";
 import { apiFetch } from "@/util/apiClient";
+import logo from "@/assets/images/logoPrimary.png"
 
 import { LeadInsertModal } from "@/components/LeadInsertModal";
 
@@ -262,7 +263,7 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
                 <img
-                  src="/src/assets/images/logoPrimary.png"
+                  src={logo}
                   alt="Logo"
                   className="h-6 w-6 object-contain"
                 />
