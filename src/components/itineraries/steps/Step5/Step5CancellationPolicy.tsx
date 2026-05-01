@@ -54,10 +54,10 @@ export default function Step5CancellationPolicy({
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-lg font-semibold">
-                        Cancellation Policy
+                        Travel Policies
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                        Define refund rules before departure
+                        Define policy rules before departure
                     </p>
                 </div>
 
@@ -66,14 +66,14 @@ export default function Step5CancellationPolicy({
                     className="bg-[#00AFEF] hover:bg-[#0095cc] text-white gap-2"
                 >
                     <Plus className="h-4 w-4" />
-                    Add Rule
+                    Add Policy
                 </Button>
             </div>
 
             {/* EMPTY */}
             {data.length === 0 && (
                 <div className="border rounded-xl p-10 text-center text-muted-foreground">
-                    No cancellation rules added yet
+                    No policies added yet
                 </div>
             )}
 
@@ -83,7 +83,7 @@ export default function Step5CancellationPolicy({
                     {/* HEADER */}
                     <div className="flex justify-between items-center">
                         <p className="font-medium">
-                            Rule {index + 1}
+                            Policy {index + 1}
                         </p>
 
                         <Button
