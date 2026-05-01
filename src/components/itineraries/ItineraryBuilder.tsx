@@ -33,7 +33,8 @@ export default function ItineraryBuilder({
         { id: 4, label: "Availability" },
         { id: 5, label: "Policy" },
     ];
-
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loadingText, setLoadingText] = useState("Saving...");
     const isEdit = !!itineraryData?.tour?.id;
     const [formData, setFormData] = useState<any>(() => {
         const t = itineraryData;
@@ -578,6 +579,9 @@ export default function ItineraryBuilder({
     // };
     const submitItinerary = async () => {
         try {
+            setIsSubmitting(true);
+            setLoadingText("Preparing data...");
+
             const isEditMode = !!formData.tour.id;
             const tourId = formData.tour.id;
 
@@ -587,6 +591,8 @@ export default function ItineraryBuilder({
             // 🆕 CREATE FLOW
             // =========================
             if (!isEditMode) {
+                setLoadingText("Creating itinerary...");
+
                 toast({ title: "Creating itinerary..." });
 
                 const createPayload: any = {
@@ -608,9 +614,9 @@ export default function ItineraryBuilder({
                         day_number: Number(d.day_number),
                         title: d.title,
                         description: d.description,
-                        hotel_name: d.hotel,
-                        distance_km: d.distance ? Number(d.distance) : 0,
-                        travel_time: d.travelTime || "",
+                        hotel_name: d.hotel_name,
+                        distance_km: d.distance_km ? Number(d.distance_km) : 0,
+                        travel_time: d.travel_time || "",
                         activities: [],
                         images: [],
                     })),
@@ -641,6 +647,7 @@ export default function ItineraryBuilder({
             // 📤 IMAGE UPLOAD (both modes)
             // =========================
             toast({ title: "Uploading images..." });
+            setLoadingText("Uploading images...");
 
             const { uploadedTourImages, uploadedDayImages } =
                 await uploadAllImages(finalTourId);
@@ -662,6 +669,7 @@ export default function ItineraryBuilder({
             }));
 
             const mergedTourImages = [...existingTourImages, ...newTourImages];
+            setLoadingText("Saving itinerary...");
 
             // =========================
             // 🔁 UPDATE (both modes)
@@ -711,9 +719,9 @@ export default function ItineraryBuilder({
                         day_number: d.day_number,
                         title: d.title,
                         description: d.description,
-                        hotel_name: d.hotel || "",
-                        distance_km: d.distance ? Number(d.distance) : 0,
-                        travel_time: d.travelTime || "",
+                        hotel_name: d.hotel_name || "",
+                        distance_km: d.distance_km ? Number(d.distance_km) : 0,
+                        travel_time: d.travel_time || "",
 
                         activities: (d.activities || []).map((a: any) => ({
                             name: a.name,
@@ -762,6 +770,9 @@ export default function ItineraryBuilder({
                 description: err.message || "Something went wrong",
                 className: "border-red-500 bg-red-50 text-red-900",
             });
+        } finally {
+            setIsSubmitting(false);
+            setLoadingText("Saving...");
         }
     };
     const uploadImage = async (file: File, tourId: number, document_type: string) => {
@@ -1145,6 +1156,29 @@ export default function ItineraryBuilder({
                     )}
                 </Button>
             </div>
+            {isSubmitting && (
+                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+
+                        {/* Spinner ring */}
+                        <div className="relative h-16 w-16">
+                            <div className="absolute inset-0 rounded-full border-4 border-white/20"></div>
+                            <div className="absolute inset-0 rounded-full border-4 border-t-[#00AFEF] animate-spin"></div>
+                        </div>
+
+                        {/* Text */}
+                        <div className="text-white text-lg font-medium tracking-wide">
+                            {loadingText}
+                        </div>
+
+                        {/* subtle subtitle */}
+                        <div className="text-white/60 text-sm">
+                            Please don’t close this window
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
+
     );
 }

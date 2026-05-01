@@ -281,7 +281,7 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                                             <Button
                                                 variant="secondary"
                                                 size="sm"
-                                                onClick={() => onEdit(item.raw)}
+                                                onClick={() => onEdit(item.raw.tour.id)}
                                             >
                                                 Edit
                                             </Button>

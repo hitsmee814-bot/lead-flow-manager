@@ -5,10 +5,10 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
     base: "/lead-flow-manager/",
-    //   server: {
-    //     host: "::",
-    //     port: 3000,
-    //   },
+      server: {
+        host: "::",
+        port: 3000,
+      },
 
     plugins: [
         react(),

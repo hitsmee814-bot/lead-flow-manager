@@ -129,9 +129,9 @@ export default function DayCard({
                             <label className="text-sm font-medium">Hotel Name</label>
                             <Input
                                 placeholder="Hotel for the night"
-                                value={day.hotel || ""}
+                                value={day.hotel_name || ""}
                                 onChange={(e) =>
-                                    updateDay(day.id, "hotel", e.target.value)
+                                    updateDay(day.id, "hotel_name", e.target.value)
                                 }
                             />
                         </div>
@@ -142,9 +142,9 @@ export default function DayCard({
                             <Input
                                 type="number"
                                 placeholder="e.g. 120"
-                                value={day.distance || ""}
+                                value={day.distance_km || ""}
                                 onChange={(e) =>
-                                    updateDay(day.id, "distance", Number(e.target.value))
+                                    updateDay(day.id, "distance_km", Number(e.target.value))
                                 }
                             />
                         </div>
@@ -154,9 +154,9 @@ export default function DayCard({
                             <label className="text-sm font-medium">Travel Time</label>
                             <Input
                                 placeholder="e.g. 4h 30m"
-                                value={day.travelTime || ""}
+                                value={day.travel_time || ""}
                                 onChange={(e) =>
-                                    updateDay(day.id, "travelTime", e.target.value)
+                                    updateDay(day.id, "travel_time", e.target.value)
                                 }
                             />
                         </div>
