@@ -4,37 +4,39 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-    base: "/lead-flow-manager",
-
-//   server: {
-//     host: "::",
-//     port: 3000,
-//   },
-
-  plugins: [
-    react(),
-
-    // 🔥 FIXED: middleware inside plugin
-    {
-      name: "redirect-root",
-      configureServer(server: ViteDevServer) {
-        server.middlewares.use((req, res, next) => {
-          if (req.url === "/") {
-            res.writeHead(302, { Location: "/bonhomiee" });
-            res.end();
-            return;
-          }
-          next();
-        });
-      },
+    base: "/lead-flow-manager/",
+    build: {
+        outDir: "docs", // 👈 IMPORTANT
     },
+    //   server: {
+    //     host: "::",
+    //     port: 3000,
+    //   },
 
-    mode === "development" && componentTagger(),
-  ].filter(Boolean),
+    plugins: [
+        react(),
 
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+        // 🔥 FIXED: middleware inside plugin
+        {
+            name: "redirect-root",
+            configureServer(server: ViteDevServer) {
+                server.middlewares.use((req, res, next) => {
+                    if (req.url === "/") {
+                        res.writeHead(302, { Location: "/bonhomiee" });
+                        res.end();
+                        return;
+                    }
+                    next();
+                });
+            },
+        },
+
+        mode === "development" && componentTagger(),
+    ].filter(Boolean),
+
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./src"),
+        },
     },
-  },
 }));
