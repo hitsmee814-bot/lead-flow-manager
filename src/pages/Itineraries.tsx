@@ -40,7 +40,7 @@ export default function Itineraries() {
                         key={refreshKey}
                         onEdit={async (id: string) => {
                             console.log(id)
-                            const res = await fetch(`http://150.241.244.100:8000/itinerary/${id}`, {
+                            const res = await fetch(`https://ascendus.bonhomiee.com/itinerary/${id}`, {
                                 method: "GET",
                                 headers: {
                                     accept: "application/json",

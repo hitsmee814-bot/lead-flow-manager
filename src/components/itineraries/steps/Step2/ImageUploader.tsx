@@ -36,7 +36,7 @@ export default function ImageUploader({
         const fetchDocTypes = async () => {
             try {
                 const res = await fetch(
-                    "http://150.241.244.100:8000/lookup/document-types-by-category/ITINERARY_IMAGE"
+                    "https://ascendus.bonhomiee.com/lookup/document-types-by-category/ITINERARY_IMAGE"
                 );
                 const data = await res.json();
                 setDocTypes(data || []);

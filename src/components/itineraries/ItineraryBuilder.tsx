@@ -230,7 +230,7 @@ export default function ItineraryBuilder({
     const getImagePreview = async (filename: string) => {
         try {
             const res = await fetch(
-                `http://150.241.244.100:8000/files/download?filename=${encodeURIComponent(filename)}`
+                `https://ascendus.bonhomiee.com/files/download?filename=${encodeURIComponent(filename)}`
             );
 
             if (!res.ok) throw new Error("Failed to fetch image");
@@ -453,7 +453,7 @@ export default function ItineraryBuilder({
     //         console.log("📤 CREATE payload:", createPayload);
 
     //         const createRes = await fetch(
-    //             "http://150.241.244.100:8000/itinerary/create",
+    //             "https://ascendus.bonhomiee.com/itinerary/create",
     //             {
     //                 method: "POST",
     //                 headers: { "Content-Type": "application/json" },
@@ -543,7 +543,7 @@ export default function ItineraryBuilder({
     //         console.log("📤 UPDATE payload:", updatePayload);
 
     //         const updateRes = await fetch(
-    //             `http://150.241.244.100:8000/itinerary/update/${tourId}`,
+    //             `https://ascendus.bonhomiee.com/itinerary/update/${tourId}`,
     //             {
     //                 method: "POST",
     //                 headers: { "Content-Type": "application/json" },
@@ -626,7 +626,7 @@ export default function ItineraryBuilder({
                 };
 
                 const res = await fetch(
-                    "http://150.241.244.100:8000/itinerary/create",
+                    "https://ascendus.bonhomiee.com/itinerary/create",
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -741,7 +741,7 @@ export default function ItineraryBuilder({
             };
 
             const updateRes = await fetch(
-                `http://150.241.244.100:8000/itinerary/update/${finalTourId}`,
+                `https://ascendus.bonhomiee.com/itinerary/update/${finalTourId}`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -782,7 +782,7 @@ export default function ItineraryBuilder({
         formData.append("document_type", document_type);
 
         const res = await fetch(
-            "http://150.241.244.100:8000/files/scan-upload-itinerary-image",
+            "https://ascendus.bonhomiee.com/files/scan-upload-itinerary-image",
             {
                 method: "POST",
                 body: formData,

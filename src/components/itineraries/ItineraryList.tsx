@@ -50,7 +50,7 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
                 setLoading(true);
 
                 const res = await fetch(
-                    "http://150.241.244.100:8000/itinerary/search",
+                    "https://ascendus.bonhomiee.com/itinerary/search",
                     {
                         method: "POST",
                         headers: {
@@ -134,7 +134,7 @@ export default function ItineraryList({ onEdit, onPreview }: Props) {
             );
 
             await fetch(
-                `http://150.241.244.100:8000/itinerary/update-status/${id}`,
+                `https://ascendus.bonhomiee.com/itinerary/update-status/${id}`,
                 {
                     method: "POST", // IMPORTANT: your API uses POST
                     headers: {

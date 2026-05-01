@@ -40,7 +40,7 @@ export default function TourPreview({
 
         try {
             const res = await fetch(
-                `http://150.241.244.100:8000/files/download?filename=${encodeURIComponent(img.image_url)}`
+                `https://ascendus.bonhomiee.com/files/download?filename=${encodeURIComponent(img.image_url)}`
             );
 
             const blob = await res.blob();
