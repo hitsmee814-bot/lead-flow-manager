@@ -4,10 +4,12 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 3000,
-  },
+    base: "/cms",
+
+//   server: {
+//     host: "::",
+//     port: 3000,
+//   },
 
   plugins: [
     react(),
