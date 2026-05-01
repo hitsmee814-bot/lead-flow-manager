@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-    base: "/lead-flow-manager/",
+    base: "/lead-flow-manager",
 
 //   server: {
 //     host: "::",
