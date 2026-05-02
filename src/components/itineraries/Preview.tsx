@@ -122,10 +122,12 @@ export default function TourPreview({
                                 <Info label="Rating" value={data?.tour?.avg_rating || 0} />
                                 <Info label="Reviews" value={data?.tour?.total_reviews || 0} />
                             </Card>
-
-                            <p className="text-sm text-muted-foreground mt-4">
-                                {data?.tour?.description || "-"}
-                            </p>
+                            <div
+                                className="text-sm text-muted-foreground mt-4"
+                                dangerouslySetInnerHTML={{
+                                    __html: data?.tour?.description || "-",
+                                }}
+                            />
                         </Section>
 
                         {/* ================= GALLERY ================= */}
