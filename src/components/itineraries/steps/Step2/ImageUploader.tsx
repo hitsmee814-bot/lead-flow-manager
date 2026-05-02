@@ -58,15 +58,25 @@ export default function ImageUploader({
         onUpload(value.filter((img) => img.id !== id));
     };
 
+    // useEffect(() => {
+    //     return () => {
+    //         value?.forEach((img) => {
+    //             if (img.preview?.startsWith("blob:")) {
+    //                 URL.revokeObjectURL(img.preview);
+    //             }
+    //         });
+    //     };
+    // }, []);
     useEffect(() => {
-        return () => {
-            value?.forEach((img) => {
-                if (img.preview?.startsWith("blob:")) {
-                    URL.revokeObjectURL(img.preview);
-                }
-            });
-        };
-    }, []);
+    return () => {
+        value?.forEach((img) => {
+            // only revoke if it's a local file preview
+            if (img.file && img.preview?.startsWith("blob:")) {
+                URL.revokeObjectURL(img.preview);
+            }
+        });
+    };
+}, []);
     /* ---------------- UPDATE CAPTION ---------------- */
     const updateCaption = (index: number, caption: string) => {
         const updated = [...value];

@@ -29,15 +29,16 @@ export default function ImageUploaderMain({
         onChange([...(value || []), ...newImages]);
     };
 
-    useEffect(() => {
-        return () => {
-            value?.forEach((img) => {
-                if (img.preview?.startsWith("blob:")) {
-                    URL.revokeObjectURL(img.preview);
-                }
-            });
-        };
-    }, []);
+useEffect(() => {
+    return () => {
+        value?.forEach((img) => {
+            // only revoke if it's a local file preview
+            if (img.file && img.preview?.startsWith("blob:")) {
+                URL.revokeObjectURL(img.preview);
+            }
+        });
+    };
+}, []);
 
     useEffect(() => {
         const fetchDocTypes = async () => {

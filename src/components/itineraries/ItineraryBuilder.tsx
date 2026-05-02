@@ -17,6 +17,8 @@ type Props = {
     onSuccess?: () => void; // 👈 add this
     itineraryData?: any;
 };
+const imageCache = new Map<string, string>();
+
 
 export default function ItineraryBuilder({
     onCancel,
@@ -152,15 +154,16 @@ export default function ItineraryBuilder({
     });
 
     useEffect(() => {
+        if (!itineraryData) return;
         const loadAllImages = async () => {
             if (!itineraryData) return;
 
             // 🔹 TOUR IMAGES
             const mappedTourImages = await Promise.all(
                 (itineraryData.images || []).map(async (img: any) => {
-                    const preview = img.image_url
+                    const preview = img.preview || (img.image_url
                         ? await getImagePreview(img.image_url)
-                        : null;
+                        : null);
 
                     return {
                         id: String(img.id),
@@ -179,9 +182,9 @@ export default function ItineraryBuilder({
                 (itineraryData.itinerary_days || []).map(async (day: any) => {
                     const mappedImages = await Promise.all(
                         (day.images || []).map(async (img: any) => {
-                            const preview = img.image_url
+                            const preview = img.preview || (img.image_url
                                 ? await getImagePreview(img.image_url)
-                                : null;
+                                : null);
 
                             return {
                                 id: String(img.id),
@@ -212,33 +215,42 @@ export default function ItineraryBuilder({
         };
 
         loadAllImages();
-    }, [itineraryData]);
-
-    useEffect(() => {
-        return () => {
-            formData.tour.images?.forEach((img: any) => {
-                if (img.preview) URL.revokeObjectURL(img.preview);
-            });
-
-            formData.itinerary_days?.forEach((d: any) => {
-                d.images?.forEach((img: any) => {
-                    if (img.preview) URL.revokeObjectURL(img.preview);
-                });
-            });
-        };
     }, []);
+
+    // useEffect(() => {
+    //     return () => {
+    //         formData.tour.images?.forEach((img: any) => {
+    //             if (img.preview) URL.revokeObjectURL(img.preview);
+    //         });
+
+    //         formData.itinerary_days?.forEach((d: any) => {
+    //             d.images?.forEach((img: any) => {
+    //                 if (img.preview) URL.revokeObjectURL(img.preview);
+    //             });
+    //         });
+    //     };
+    // }, []);
+
     const getImagePreview = async (filename: string) => {
+        if (imageCache.has(filename)) {
+            return imageCache.get(filename);
+        }
+
         try {
             const res = await fetch(
                 `https://ascendus.bonhomiee.com/files/download?filename=${encodeURIComponent(filename)}`
             );
 
-            if (!res.ok) throw new Error("Failed to fetch image");
+            if (!res.ok) throw new Error("Failed");
 
             const blob = await res.blob();
-            return URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
+
+            imageCache.set(filename, url); // ✅ cache it
+
+            return url;
         } catch (err) {
-            console.error("Image preview failed:", err);
+            console.error("Preview failed:", err);
             return null;
         }
     };
