@@ -121,3 +121,29 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+/* Tiptap Editor Fix */
+.ProseMirror {
+  outline: none;
+  min-height: 200px;
+}
+
+/* ✅ FIX BULLETS */
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li {
+  display: list-item;
+  margin-left: 0.5rem;
+}
+
+/* spacing */
+.ProseMirror p {
+  margin: 0.5rem 0;
+}

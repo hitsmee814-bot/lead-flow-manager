@@ -11,6 +11,14 @@ import {
 } from "@/components/ui/select";
 import ImageUploaderMain from "./ImageUploaderMain";
 import { DateTimePicker } from "@/components/custom/DateTimePicker";
+import { Editor } from "@tinymce/tinymce-react";
+
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import Link from "@tiptap/extension-link";
+
+import { Bold, Italic, List, Heading2, Link2 } from "lucide-react";
 
 type Props = {
     data: any;
@@ -41,6 +49,30 @@ export default function Step1PackageInfo({ data, setData }: Props) {
         setData(updated);
     };
 
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Placeholder.configure({
+                placeholder: "Describe what makes this tour special...",
+            }),
+            Link.configure({
+                openOnClick: false,
+            }),
+        ],
+        content: data.description || "",
+        editorProps: {
+            attributes: {
+                class:
+                    "prose max-w-none min-h-[200px] focus:outline-none",
+            },
+        },
+        onUpdate: ({ editor }) => {
+            update("description", editor.getHTML());
+        },
+    });
+    if (!editor) return null;
+
+
     return (
         <div className="space-y-6 pr-4">
             {/* HEADER */}
@@ -64,11 +96,64 @@ export default function Step1PackageInfo({ data, setData }: Props) {
             {/* DESCRIPTION */}
             <div>
                 <RequiredLabel>Description</RequiredLabel>
-                <Input
-                    value={data.description || ""}
-                    onChange={(e) => update("description", e.target.value)}
-                    placeholder="Describe what makes this tour special..."
-                />
+
+                <div className="border rounded-lg overflow-hidden">
+
+                    {/* Toolbar */}
+                    <div className="flex gap-2 border-b p-2 bg-muted">
+                        <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleBold().run()}
+                            className={`px-2 py-1 rounded ${editor.isActive("bold") ? "bg-gray-300" : ""
+                                }`}
+                        >
+                            <Bold size={16} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleItalic().run()}
+                            className={`px-2 py-1 rounded ${editor.isActive("italic") ? "bg-gray-300" : ""
+                                }`}
+                        >
+                            <Italic size={16} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                            className={`px-2 py-1 rounded ${editor.isActive("heading", { level: 2 }) ? "bg-gray-300" : ""
+                                }`}
+                        >
+                            <Heading2 size={16} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleBulletList().run()}
+                            className={`px-2 py-1 rounded ${editor.isActive("bulletList") ? "bg-gray-300" : ""
+                                }`}
+                        >
+                            <List size={16} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const url = prompt("Enter URL");
+                                if (url) editor.chain().focus().setLink({ href: url }).run();
+                            }}
+                        >
+                            <Link2 size={16} />
+                        </button>
+                    </div>
+
+                    {/* Editor */}
+                    <EditorContent
+                        editor={editor}
+                        className="p-4 min-h-[200px] prose max-w-none focus:outline-none"
+                    />
+                </div>
             </div>
 
             {/* ORIGIN + DESTINATION */}

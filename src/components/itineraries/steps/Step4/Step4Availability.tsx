@@ -81,7 +81,7 @@ export default function Step4Availability({
                 <div>
                     <h2 className="text-lg font-semibold">Availability</h2>
                     <p className="text-sm text-muted-foreground">
-                        Define booking slots & pricing windows
+                        Define trip size & pricing windows
                     </p>
                 </div>
 
@@ -96,7 +96,7 @@ export default function Step4Availability({
 
             {data.length === 0 && (
                 <div className="border rounded-xl p-10 text-center text-muted-foreground">
-                    No availability slots added yet
+                    No Trp Sizes and price windows added yet
                 </div>
             )}
 
@@ -157,7 +157,7 @@ export default function Step4Availability({
                         </div>
 
                         <div className="space-y-1">
-                            <Label>Total Slots</Label>
+                            <Label>Total Trip Slots</Label>
                             <Input
                                 type="number"
                                 value={item.total_slots ?? ""}
@@ -174,7 +174,7 @@ export default function Step4Availability({
                         </div>
 
                         <div className="space-y-1">
-                            <Label>Available Slots</Label>
+                            <Label>Available Trip Slots</Label>
                             <Input
                                 type="number"
                                 value={item.available_slots}
