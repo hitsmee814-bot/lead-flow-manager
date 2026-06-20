@@ -35,9 +35,15 @@ export default function ItineraryBuilder({
         { id: 4, label: "Availability" },
         { id: 5, label: "Policy" },
     ];
+    const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+    const [propertyType, setPropertyType] = useState("");
+
+    const [property, setProperty] = useState("");
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingText, setLoadingText] = useState("Saving...");
     const isEdit = !!itineraryData?.tour?.id;
+
     const [formData, setFormData] = useState<any>(() => {
         const t = itineraryData;
 
@@ -154,6 +160,28 @@ export default function ItineraryBuilder({
     });
 
     useEffect(() => {
+        const fetchPropertyTypes = async () => {
+            try {
+
+                const response = await fetch(
+                    "http://150.241.244.100:8000/itinerary/property-types"
+                );
+
+                const result = await response.json();
+
+                if (result.success) {
+                    setPropertyTypes(result.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch property types:", error);
+            } finally {
+            }
+        };
+
+        fetchPropertyTypes();
+    }, []);
+
+    useEffect(() => {
         if (!itineraryData) return;
         const loadAllImages = async () => {
             if (!itineraryData) return;
@@ -217,20 +245,6 @@ export default function ItineraryBuilder({
         loadAllImages();
     }, []);
 
-    // useEffect(() => {
-    //     return () => {
-    //         formData.tour.images?.forEach((img: any) => {
-    //             if (img.preview) URL.revokeObjectURL(img.preview);
-    //         });
-
-    //         formData.itinerary_days?.forEach((d: any) => {
-    //             d.images?.forEach((img: any) => {
-    //                 if (img.preview) URL.revokeObjectURL(img.preview);
-    //             });
-    //         });
-    //     };
-    // }, []);
-
     const getImagePreview = async (filename: string) => {
         if (imageCache.has(filename)) {
             return imageCache.get(filename);
@@ -257,6 +271,9 @@ export default function ItineraryBuilder({
     const totalSteps = steps.length;
     const validateStep1 = () => {
         const t = formData.tour;
+
+        if (!propertyType) return "Property type is required";
+        if (!property) return "Property is required";
 
         if (!t.start_date) return "Start date is required";
         if (!t.end_date) return "End date is required";
@@ -413,182 +430,6 @@ export default function ItineraryBuilder({
         return null;
     };
 
-    // const submitItinerary = async () => {
-    //     try {
-    //         toast({ title: "Creating itinerary..." });
-
-    //         // 🔹 STEP 1: CREATE (no images)
-    //         const createPayload: any = {
-    //             tour: {
-    //                 title: formData.tour.title,
-    //                 description: formData.tour.description,
-    //                 duration_days: formData.tour.duration_days,
-    //                 duration_nights: formData.tour.duration_nights,
-    //                 start_date: formData.tour.start_date,
-    //                 end_date: formData.tour.end_date,
-    //                 origin_city: formData.tour.origin_city,
-    //                 destination: formData.tour.destination,
-    //                 base_price: Number(formData.tour.base_price),
-    //                 currency: formData.tour.currency,
-    //                 max_guests: Number(formData.tour.max_guests),
-    //             },
-
-    //             itinerary_days: formData.itinerary_days.map((d: any) => ({
-    //                 date: d.date,
-    //                 day_number: Number(d.day_number),
-    //                 title: d.title,
-    //                 description: d.description,
-    //                 hotel_name: d.hotel,
-    //                 distance_km: d.distance ? Number(d.distance) : 0,
-    //                 travel_time: d.travelTime || "",
-    //                 activities: [],
-    //                 images: [],
-    //             })),
-    //         };
-
-    //         if (formData.availability?.length > 0) {
-    //             createPayload.availability = formData.availability;
-    //         }
-
-    //         if (formData.cancellation_policy?.length > 0) {
-    //             createPayload.cancellation_policy = formData.cancellation_policy;
-    //         }
-
-    //         if (formData.accommodations?.length > 0) {
-    //             createPayload.accommodations = formData.accommodations;
-    //         }
-
-    //         // if (formData.tour.images?.length > 0) {
-    //         //     createPayload.images = formData.images;
-    //         // }
-
-    //         console.log("📤 CREATE payload:", createPayload);
-
-    //         const createRes = await fetch(
-    //             "https://ascendus.bonhomiee.com/itinerary/create",
-    //             {
-    //                 method: "POST",
-    //                 headers: { "Content-Type": "application/json" },
-    //                 body: JSON.stringify(createPayload),
-    //             }
-    //         );
-
-    //         const createData = await createRes.json();
-
-    //         if (!createRes.ok) {
-    //             throw new Error(createData?.message || "Create failed");
-    //         }
-
-    //         const tourId = createData.tour_id;
-    //         console.log("✅ Created tour:", tourId);
-
-    //         toast({ title: "Uploading images..." });
-
-    //         // 🔹 STEP 2: UPLOAD IMAGES
-    //         const { uploadedTourImages, uploadedDayImages } =
-    //             await uploadAllImages(tourId);
-
-    //         console.log("📦 Uploaded images:", {
-    //             uploadedTourImages,
-    //             uploadedDayImages,
-    //         });
-
-    //         // 🔹 STEP 3: UPDATE with images
-    //         const updatePayload = {
-    //             tour: {
-    //                 title: formData.tour.title,
-    //                 description: formData.tour.description,
-    //                 duration_days: formData.tour.duration_days,
-    //                 duration_nights: formData.tour.duration_nights,
-    //                 start_date: formData.tour.start_date,
-    //                 end_date: formData.tour.end_date,
-    //                 origin_city: formData.tour.origin_city,
-    //                 destination: formData.tour.destination,
-    //                 base_price: Number(formData.tour.base_price),
-    //                 currency: formData.tour.currency,
-    //                 max_guests: Number(formData.tour.max_guests),
-    //             },
-
-    //             images: uploadedTourImages.map((img: any) => ({
-    //                 image_url: img.image_url || img.url,   // 🔥 IMPORTANT
-    //                 caption: img.caption,
-    //                 document_type: img.document_type,
-    //                 is_cover: img.is_cover || false,
-    //             })),
-
-    //             itinerary_days: formData.itinerary_days.map((d: any) => {
-    //                 const found = uploadedDayImages.find(
-    //                     (x) => x.day_number === d.day_number
-    //                 );
-
-    //                 return {
-    //                     date: d.date,
-    //                     day_number: d.day_number,
-    //                     title: d.title,
-    //                     description: d.description,
-    //                     hotel_name: d.hotel || "",
-    //                     distance_km: d.distance ? Number(d.distance) : 0,
-    //                     travel_time: d.travelTime || "",
-
-    //                     activities: (d.activities || []).map((a: any) => ({
-    //                         name: a.name,
-    //                         type: a.type,
-    //                         description: a.description,
-    //                         latitude: Number(a.latitude),
-    //                         longitude: Number(a.longitude),
-    //                     })),
-
-    //                     images: (found?.images || []).map((img: any) => ({
-    //                         image_url: img.image_url || img.url,   // 🔥 scan-upload result
-    //                         caption: img.caption,
-    //                         document_type: img.document_type,
-    //                         is_cover: img.is_cover || false,
-    //                     })),
-    //                 };
-    //             }),
-
-    //             availability: formData.availability || [],
-    //             cancellation_policy: formData.cancellation_policy || [],
-    //             accommodations: formData.accommodations || [],
-    //         };
-
-    //         console.log("📤 UPDATE payload:", updatePayload);
-
-    //         const updateRes = await fetch(
-    //             `https://ascendus.bonhomiee.com/itinerary/update/${tourId}`,
-    //             {
-    //                 method: "POST",
-    //                 headers: { "Content-Type": "application/json" },
-    //                 body: JSON.stringify(updatePayload),
-    //             }
-    //         );
-
-    //         const updateData = await updateRes.json();
-
-    //         if (!updateRes.ok) {
-    //             throw new Error(updateData?.message || "Update failed");
-    //         }
-
-    //         console.log("✅ FINAL SUCCESS");
-
-    //         toast({
-    //             title: "Itinerary created 🎉",
-    //             description: "All images uploaded successfully",
-    //             className: "border-green-500 bg-green-50 text-green-900",
-    //         });
-    //         onSuccess?.();
-    //         onCancel();
-
-    //     } catch (err: any) {
-    //         console.error("❌ FLOW FAILED:", err);
-
-    //         toast({
-    //             title: "Process failed",
-    //             description: err.message || "Something went wrong",
-    //             className: "border-red-500 bg-red-50 text-red-900",
-    //         });
-    //     }
-    // };
     const submitItinerary = async () => {
         try {
             setIsSubmitting(true);
@@ -653,7 +494,34 @@ export default function ItineraryBuilder({
                 }
 
                 finalTourId = data.tour_id;
+
+                if (property) {
+                    setLoadingText("Associating property...");
+
+                    const propertyRes = await fetch(
+                        "https://ascendus.bonhomiee.com/itinerary/associate-property",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                tour_id: finalTourId,
+                                property_ids: [Number(property)],
+                            }),
+                        }
+                    );
+
+                    const propertyData = await propertyRes.json();
+
+                    if (!propertyRes.ok) {
+                        throw new Error(
+                            propertyData?.message || "Failed to associate property"
+                        );
+                    }
+                }
             }
+
 
             // =========================
             // 📤 IMAGE UPLOAD (both modes)
@@ -1082,6 +950,11 @@ export default function ItineraryBuilder({
             {step === 1 && (
                 <Step1PackageInfo
                     data={formData.tour}
+                    propertyTypes={propertyTypes}
+                    propertyType={propertyType}
+                    setPropertyType={setPropertyType}
+                    property={property}
+                    setProperty={setProperty}
                     setData={(updated) =>
                         setFormData({ ...formData, tour: updated })
                     }

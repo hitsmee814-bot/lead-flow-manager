@@ -11,21 +11,66 @@ import {
 } from "@/components/ui/select";
 import ImageUploaderMain from "./ImageUploaderMain";
 import { DateTimePicker } from "@/components/custom/DateTimePicker";
-import { Editor } from "@tinymce/tinymce-react";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 
-import { Bold, Italic, List, Heading2, Link2 } from "lucide-react";
+import { Bold, Italic, List, Heading2, Link2, Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Props = {
     data: any;
     setData: (data: any) => void;
+    propertyTypes: any;
+
+    propertyType: string;
+    setPropertyType: (value: string) => void;
+
+    property: string;
+    setProperty: (value: string) => void;
 };
 
-export default function Step1PackageInfo({ data, setData }: Props) {
+export default function Step1PackageInfo({ data, setData, propertyTypes, propertyType,
+    setPropertyType, property, setProperty }: Props) {
+    const [properties, setProperties] = useState<any[]>([]);
+    const selectedProperty = properties.find(
+        (p) => String(p.id) === property
+    );
+    useEffect(() => {
+        const fetchProperties = async () => {
+            if (!propertyType) {
+                setProperties([]);
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    `http://150.241.244.100:8000/itinerary/properties/${encodeURIComponent(
+                        propertyType
+                    )}`
+                );
+
+                const result = await response.json();
+
+                if (result.success) {
+                    setProperties(result.data || []);
+                } else {
+                    setProperties([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch properties:", error);
+                setProperties([]);
+            } finally {
+            }
+        };
+
+        fetchProperties();
+    }, [propertyType]);
+
     const update = (key: string, value: any) => {
         let updated = { ...data, [key]: value };
 
@@ -155,6 +200,74 @@ export default function Step1PackageInfo({ data, setData }: Props) {
                     />
                 </div>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <RequiredLabel>Property Type</RequiredLabel>
+                    <Select
+                        value={propertyType || ""}
+                        onValueChange={(val) => {
+                            setPropertyType(val);
+                            setProperty("");
+                        }}
+                    >
+                        <SelectTrigger>
+                            <SelectValue
+                                placeholder="Select Property Types"
+                            />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            {propertyTypes.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                    {type}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <div className="flex items-center gap-2">
+                        <RequiredLabel>Properties</RequiredLabel>
+
+                        {selectedProperty?.property_desc && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-help mb-2" />
+                                    </TooltipTrigger>
+
+                                    <TooltipContent className="max-w-xs">
+                                        <p>{selectedProperty.property_desc}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )}
+                    </div>
+
+                    <Select
+                        value={property || ""}
+                        onValueChange={setProperty}
+                        disabled={!propertyType}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Property" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            {properties.map((property) => (
+                                <SelectItem
+                                    key={property.id}
+                                    value={String(property.id)}
+                                >
+                                    {property.property_values}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
 
             {/* ORIGIN + DESTINATION */}
             <div className="grid grid-cols-2 gap-4">
