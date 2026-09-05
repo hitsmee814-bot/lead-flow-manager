@@ -39,7 +39,7 @@ export default function Itineraries() {
                     <ItineraryList
                         key={refreshKey}
                         onEdit={async (id: string) => {
-                            console.log(id)
+                            console.log("Itinerary ID is " + id);
                             const res = await fetch(`https://ascendus.bonhomiee.com/itinerary/tourid/${id}`, {
                                 method: "GET",
                                 headers: {
