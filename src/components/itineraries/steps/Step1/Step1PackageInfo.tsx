@@ -49,7 +49,7 @@ export default function Step1PackageInfo({ data, setData, propertyTypes, propert
             try {
 
                 const response = await fetch(
-                    `http://150.241.244.100:8000/itinerary/properties/${encodeURIComponent(
+                    `https://ascendus.bonhomiee.com/itinerary/properties/${encodeURIComponent(
                         propertyType
                     )}`
                 );

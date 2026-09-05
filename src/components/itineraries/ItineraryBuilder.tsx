@@ -164,7 +164,7 @@ export default function ItineraryBuilder({
             try {
 
                 const response = await fetch(
-                    "http://150.241.244.100:8000/itinerary/property-types"
+                    "https://ascendus.bonhomiee.com/itinerary/property-types"
                 );
 
                 const result = await response.json();
